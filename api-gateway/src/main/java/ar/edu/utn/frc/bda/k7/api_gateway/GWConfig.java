@@ -11,25 +11,19 @@ public class GWConfig {
     
     @Bean
     public RouteLocator configPaths(RouteLocatorBuilder builder,
-        @Value ("http://localhost:8181") String puertoRuta,
-        @Value ("/api/ruta/camiones") String uriCamiones,
-        @Value ("/api/ruta/depositos") String uriDepositos,
-        @Value ("/api/ruta/ubicaciones") String uriUbicaciones,
-        @Value ("/api/ruta/tarifas/combustible") String uriTaCombustible,
-        @Value ("/api/ruta/tarifas/volumen") String uriTaVolumen,
-        @Value ("/api/ruta/**") String uriRuta
+        @Value ("http://localhost:") String baseHost, //Esta declaracion de cosas me dijo copylot de meterlas en el .properties
+        @Value ("/api/ruta/**") String uriRuta,       //Pero nose, dsp lo veremos :]
+        @Value ("/api/users/**") String uriUsuarios,
+        @Value ("/api/solicitudes/**") String uriSolicitudes,
+        @Value ("/api/maps/**") String uriMaps,
+        @Value ("/api/auth/**") String uriAuth
         ) {
         return builder.routes()
-        .route(r -> r.path(uriCamiones).filters(f -> f.rewritePath(uriCamiones, "/camiones")).uri(puertoRuta))
+        .route(r -> r.path(uriRuta).uri(baseHost + "8181"))
+        .route(r -> r.path(uriUsuarios).uri(baseHost + "8080"))
+        .route(r -> r.path(uriSolicitudes).uri(baseHost + "8081"))
+        .route(r -> r.path(uriMaps).uri(baseHost + "9090"))
+        .route(r -> r.path(uriAuth).uri(baseHost + "9091"))
         .build();
-    }
-
-    @Bean
-    public RouteLocator configurarRutasUsuarios (RouteLocatorBuilder builder){
-        return builder.routes()
-            .route(r -> r
-            .path("/api/users/**")
-            .uri("http://localhost:8080"))
-            .build();
     }
 }
