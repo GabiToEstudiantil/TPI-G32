@@ -10,16 +10,17 @@ import org.springframework.context.annotation.Configuration;
 public class GWConfig {
     
     @Bean
-    public RouteLocator buildRutas(RouteLocatorBuilder builder,
-        @Value ("localhost:8181") String puertoRutas,
+    public RouteLocator configPaths(RouteLocatorBuilder builder,
+        @Value ("localhost:8181") String puertoRuta,
         @Value ("/api/ruta/camiones") String uriCamiones,
         @Value ("/api/ruta/depositos") String uriDepositos,
         @Value ("/api/ruta/ubicaciones") String uriUbicaciones,
         @Value ("/api/ruta/tarifas/combustible") String uriTaCombustible,
-        @Value ("/api/ruta/tarifas/volumen") String uriTaVolumen
+        @Value ("/api/ruta/tarifas/volumen") String uriTaVolumen,
+        @Value ("/api/ruta/**") String uriRuta
         ) {
         return builder.routes()
-        .route(r -> r.path(uriCamiones).filters(f -> f.rewritePath(uriCamiones, "/camiones")).uri(puertoRutas + uriCamiones))
+        .route(r -> r.path(uriCamiones).filters(f -> f.rewritePath(uriCamiones, "/camiones")).uri(puertoRuta + uriCamiones))
         .build();
     }
 
