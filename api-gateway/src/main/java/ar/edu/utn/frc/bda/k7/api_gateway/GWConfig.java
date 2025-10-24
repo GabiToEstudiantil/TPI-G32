@@ -27,12 +27,8 @@ public class GWConfig {
     public RouteLocator configurarRutasUsuarios (RouteLocatorBuilder builder){
         return builder.routes()
             .route(r -> r
-                .path("/api/users/clientes/**")
-                .filters(f -> f.rewritePath("/api/users/clientes/**", "/clientes"))
-                .uri("localhost:8080/api/users/clientes"))
-            .route(r -> r
-                .path("/api/users/transportistas/**")
-                .uri("localhost:8080/api/users/transportistas"))
+            .path("/api/users/**")
+            .uri("http://localhost:8080"))
             .build();
     }
 }
