@@ -22,4 +22,17 @@ public class GWConfig {
         .route(r -> r.path(uriCamiones).filters(f -> f.rewritePath(uriCamiones, "/camiones")).uri(puertoRutas + uriCamiones))
         .build();
     }
+
+    @Bean
+    public RouteLocator configurarRutasUsuarios (RouteLocatorBuilder builder){
+        return builder.routes()
+            .route(r -> r
+                .path("/api/users/clientes/**")
+                .filters(f -> f.rewritePath("/api/users/clientes/**", "/clientes"))
+                .uri("localhost:8080/api/users/clientes"))
+            .route(r -> r
+                .path("/api/users/transportistas/**")
+                .uri("localhost:8080/api/users/transportistas"))
+            .build();
+    }
 }
