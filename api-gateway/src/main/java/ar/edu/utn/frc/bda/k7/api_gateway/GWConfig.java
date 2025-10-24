@@ -11,7 +11,7 @@ public class GWConfig {
     
     @Bean
     public RouteLocator configPaths(RouteLocatorBuilder builder,
-        @Value ("localhost:8181") String puertoRuta,
+        @Value ("http://localhost:8181") String puertoRuta,
         @Value ("/api/ruta/camiones") String uriCamiones,
         @Value ("/api/ruta/depositos") String uriDepositos,
         @Value ("/api/ruta/ubicaciones") String uriUbicaciones,
@@ -20,7 +20,7 @@ public class GWConfig {
         @Value ("/api/ruta/**") String uriRuta
         ) {
         return builder.routes()
-        .route(r -> r.path(uriCamiones).filters(f -> f.rewritePath(uriCamiones, "/camiones")).uri(puertoRuta + uriCamiones))
+        .route(r -> r.path(uriCamiones).filters(f -> f.rewritePath(uriCamiones, "/camiones")).uri(puertoRuta))
         .build();
     }
 
