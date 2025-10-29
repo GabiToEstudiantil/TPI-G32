@@ -14,7 +14,7 @@ public class GWConfig {
         @Value ("http://localhost:") String baseHost, //Esta declaracion de cosas me dijo copylot de meterlas en el .properties
         @Value ("/api/ruta/**") String uriRuta,       //Pero nose, dsp lo veremos :]
         @Value ("/api/users/**") String uriUsuarios,
-        @Value ("/api/solicitudes/**") String uriSolicitudes,
+        @Value ("/api/solicitudes/**") String uriSolicitudes, @Value ("/api/contenedores/**") String uriContenedores,
         @Value ("/api/maps/**") String uriMaps,
         @Value ("/api/auth/**") String uriAuth
         ) {
@@ -22,6 +22,7 @@ public class GWConfig {
         .route(r -> r.path(uriRuta).uri(baseHost + "8181"))
         .route(r -> r.path(uriUsuarios).uri(baseHost + "8080"))
         .route(r -> r.path(uriSolicitudes).uri(baseHost + "8081"))
+        .route(r -> r.path(uriContenedores).uri(baseHost + "8081"))
         .route(r -> r.path(uriMaps).uri(baseHost + "9090"))
         .route(r -> r.path(uriAuth).uri(baseHost + "9091"))
         .build();
