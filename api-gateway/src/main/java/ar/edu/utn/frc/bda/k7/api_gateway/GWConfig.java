@@ -21,8 +21,8 @@ public class GWConfig {
         return builder.routes()
         .route(r -> r.path(uriRuta).uri(baseHost + "8181"))
         .route(r -> r.path(uriUsuarios).uri(baseHost + "8080"))
-        .route(r -> r.path(uriSolicitudes).uri(baseHost + "8081"))
-        .route(r -> r.path(uriContenedores).uri(baseHost + "8081"))
+        .route(r -> r.path(uriSolicitudes).uri(baseHost + "8180"))
+        .route(r -> r.path(uriContenedores).uri(baseHost + "8180"))
         .route(r -> r.path(uriMaps).uri(baseHost + "9090"))
         .route(r -> r.path(uriAuth).uri(baseHost + "9091"))
         .build();
