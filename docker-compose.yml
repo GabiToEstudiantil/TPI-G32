@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # --- 1. Servicio Keycloak (Autenticación) ---
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.3
+    container_name: keycloak
+    command: start-dev
+    ports:
+      - "8081:8080"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin123
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+
+  # --- 2. Base de Datos de Solicitudes ---
+  db-solicitudes:
+    image: postgres:latest
+    container_name: db-solicitudes
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: DB_SOLICITUDES
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    volumes:
+      - data-solicitudes:/var/lib/postgresql # Volumen para guardar datos
+      - ./db-scripts/solicitudes:/docker-entrypoint-initdb.d # Script de creación
+
+  # --- 3. Base de Datos de Rutas ---
+  db-rutas:
+    image: postgres:latest
+    container_name: db-rutas
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: DB_RUTAS
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    volumes:
+      - data-rutas:/var/lib/postgresql # Volumen para guardar datos
+      - ./db-scripts/rutas:/docker-entrypoint-initdb.d # Script de creación
+
+  # --- 4. Base de Datos de Usuarios ---
+  db-users:
+    image: postgres:latest
+    container_name: db-users
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_DB: DB_USERS
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    volumes:
+      - data-users:/var/lib/postgresql # Volumen para guardar datos
+      - ./db-scripts/usuarios:/docker-entrypoint-initdb.d # Script de creación
+
+# --- Volúmenes (Discos duros) ---
+volumes:
+  keycloak_data:
+  data-solicitudes:
+  data-rutas:
+  data-users:
