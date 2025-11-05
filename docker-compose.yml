@@ -7,12 +7,14 @@ services:
     container_name: keycloak
     command: start-dev
     ports:
-      - "8081:8080"
+      - "8081:8080" # Keycloak expuesto en el puerto 8081 de tu PC
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin123
     volumes:
       - keycloak_data:/opt/keycloak/data
+    networks:
+      - backend
 
   # --- 2. Base de Datos de Solicitudes ---
   db-solicitudes:
@@ -25,8 +27,10 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin123
     volumes:
-      - data-solicitudes:/var/lib/postgresql # Volumen para guardar datos
-      - ./db-scripts/solicitudes:/docker-entrypoint-initdb.d # Script de creación
+      - data-solicitudes:/var/lib/postgresql 
+      - ./db-scripts/solicitudes:/docker-entrypoint-initdb.d #
+    networks:
+      - backend
 
   # --- 3. Base de Datos de Rutas ---
   db-rutas:
@@ -39,8 +43,10 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin123
     volumes:
-      - data-rutas:/var/lib/postgresql # Volumen para guardar datos
-      - ./db-scripts/rutas:/docker-entrypoint-initdb.d # Script de creación
+      - data-rutas:/var/lib/postgresql 
+      - ./db-scripts/rutas:/docker-entrypoint-initdb.d #
+    networks:
+      - backend
 
   # --- 4. Base de Datos de Usuarios ---
   db-users:
@@ -53,8 +59,31 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin123
     volumes:
-      - data-users:/var/lib/postgresql # Volumen para guardar datos
-      - ./db-scripts/usuarios:/docker-entrypoint-initdb.d # Script de creación
+      - data-users:/var/lib/postgresql 
+      - ./db-scripts/usuarios:/docker-entrypoint-initdb.d #
+    networks:
+      - backend
+
+  # --- 5. Microservicio App Rutas (NUEVO) ---
+  rutas-app:
+    build: ./rutas  # 1. Apunta a la carpeta 'rutas' que contiene el Dockerfile
+    container_name: rutas-app
+    ports:
+      - "8181:8181" # 2. Mapea el puerto 8181 de tu PC al 8181 del contenedor
+    environment:
+      # --- Conexión a la Base de Datos 'db-rutas' ---
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-rutas:5432/DB_RUTAS
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+      
+      # --- Conexión a Keycloak (para Spring Security) ---
+      # 3. URL para validar tokens. ¡Asegúrate que 'tpi-backend' es tu realm!
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/tpi-backend
+    networks:
+      - backend
+    depends_on:
+      - db-rutas    # Se asegura que la BD de rutas inicie primero
+      - keycloak    # Se asegura que Keycloak inicie primero
 
 # --- Volúmenes (Discos duros) ---
 volumes:
@@ -62,3 +91,8 @@ volumes:
   data-solicitudes:
   data-rutas:
   data-users:
+
+# --- Red interna ---
+networks:
+  backend:
+    driver: bridge
