@@ -4,9 +4,15 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Table(name = "camiones")
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Camion {
 
     @Id @Column(name = "dominio")

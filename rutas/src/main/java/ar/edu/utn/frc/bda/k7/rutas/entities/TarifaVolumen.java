@@ -6,9 +6,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "tarifas_volumen")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TarifaVolumen {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,5 +30,4 @@ public class TarifaVolumen {
     @Column(name = "costo_km_base")
     private Double costoKmBase;
 
-    // Getters and Setters
 }
