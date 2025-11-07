@@ -1,10 +1,13 @@
 package ar.edu.utn.frc.bda.k7.rutas.services;
 
+import java.util.ArrayList;
+
 import org.springframework.stereotype.Service;
 
 import ar.edu.utn.frc.bda.k7.rutas.dtos.UbicacionDTO;
 import ar.edu.utn.frc.bda.k7.rutas.entities.Ubicacion;
 import ar.edu.utn.frc.bda.k7.rutas.repositories.UbicacionRepo;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @Service
@@ -36,5 +39,21 @@ public class UbicacionService {
     }
     //FIN Mappers
 
+    public ArrayList<UbicacionDTO> getAllUbicaciones() {
+        ArrayList<UbicacionDTO> ubicaciones = new ArrayList<>();
+        for (Ubicacion ubicacion : ubicacionRepo.findAll()) {
+            ubicaciones.add(toDTO(ubicacion));
+        }
+        return ubicaciones;
+    }
 
+    public UbicacionDTO getUbicacionById(Integer ubicacionId) {
+        return toDTO(ubicacionRepo.findById(ubicacionId).orElse(null));
+    }
+
+    @Transactional
+    public Ubicacion saveUbicacion(UbicacionDTO dto) {
+        Ubicacion entity = toUbicacion(dto);
+        return ubicacionRepo.save(entity);
+    }
 }

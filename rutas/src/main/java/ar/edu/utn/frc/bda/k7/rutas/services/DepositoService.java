@@ -53,7 +53,8 @@ public class DepositoService {
         return depositoRepo.save(deposito);
     }
 
-    public DepositoDTO getDepositoById(String depositoId) {
-        return toDTO(depositoRepo.findById(Integer.parseInt(depositoId)).orElse(null));
+    public DepositoDTO getDepositoById(Integer depositoId) {
+        return toDTO(depositoRepo.findById(depositoId).orElse(null));
     }
+
 }

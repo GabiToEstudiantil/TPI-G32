@@ -23,8 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/api/ruta/depositos")
 public class DepositoController {
     
-    @Autowired
-    private DepositoService depositoService;
+    private final DepositoService depositoService;
 
     @GetMapping
     public List<DepositoDTO> getDepositos() {
@@ -38,6 +37,9 @@ public class DepositoController {
             dto.getUbicacion().getLatitud() == null && dto.getUbicacion().getLongitud() == null)) {
                 return ResponseEntity.badRequest().build();
         }
+        if (depositoService.getDepositoById(dto.getId()) != null) {
+            return ResponseEntity.status(409).build();
+        }
         Deposito entity = depositoService.saveDeposito(dto);
         return ResponseEntity.status(201).body(entity);
     }
@@ -50,7 +52,7 @@ public class DepositoController {
                 return ResponseEntity.badRequest().build();
         }
 
-        if (depositoService.getDepositoById(depositoId) == null) {
+        if (depositoService.getDepositoById(Integer.parseInt(depositoId)) == null) {
             return ResponseEntity.notFound().build();
         }
         
