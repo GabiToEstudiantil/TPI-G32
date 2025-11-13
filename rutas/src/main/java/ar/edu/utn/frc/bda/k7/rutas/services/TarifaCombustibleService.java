@@ -1,11 +1,8 @@
 package ar.edu.utn.frc.bda.k7.rutas.services;
 
 import java.util.ArrayList;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import ar.edu.utn.frc.bda.k7.rutas.dtos.TarifaCombustibleDTO;
 import ar.edu.utn.frc.bda.k7.rutas.entities.TarifaCombustible;
 import ar.edu.utn.frc.bda.k7.rutas.repositories.TarifaCombustibleRepo;

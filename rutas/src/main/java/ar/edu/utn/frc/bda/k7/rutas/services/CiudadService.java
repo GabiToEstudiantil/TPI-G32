@@ -1,8 +1,6 @@
 package ar.edu.utn.frc.bda.k7.rutas.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import ar.edu.utn.frc.bda.k7.rutas.dtos.CiudadDTO;
 import ar.edu.utn.frc.bda.k7.rutas.entities.Ciudad;
 import ar.edu.utn.frc.bda.k7.rutas.repositories.CiudadRepo;
