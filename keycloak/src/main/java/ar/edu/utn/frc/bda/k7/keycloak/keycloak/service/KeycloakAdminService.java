@@ -6,7 +6,6 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
-
 import ar.edu.utn.frc.bda.k7.keycloak.keycloak.dto.CreateUserRequestDTO;
 import jakarta.ws.rs.core.Response;
 import java.util.List;

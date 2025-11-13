@@ -33,7 +33,7 @@ public class Ubicacion {
     private String direccionTextual;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "id_ciudad")
     private Ciudad ciudad;
 
 }

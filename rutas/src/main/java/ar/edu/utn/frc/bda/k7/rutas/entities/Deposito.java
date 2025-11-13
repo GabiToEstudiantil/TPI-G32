@@ -30,6 +30,6 @@ public class Deposito {
     private Double costoEstadiaDiario;
 
     @OneToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "id_ubicacion")
     private Ubicacion ubicacion;
 }

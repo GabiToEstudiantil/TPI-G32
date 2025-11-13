@@ -85,6 +85,23 @@ services:
       - db-rutas    # Se asegura que la BD de rutas inicie primero
       - keycloak    # Se asegura que Keycloak inicie primero
 
+  # --- 6. Microservicio Users ---
+  users:
+    build: ./users
+    container_name: users-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-users:5432/DB_USERS
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/tpi-backend
+    networks:
+      - backend
+    depends_on:
+      - db-users
+      - keycloak
+
 # --- Volúmenes (Discos duros) ---
 volumes:
   keycloak_data:
