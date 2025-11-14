@@ -105,7 +105,7 @@ services:
 
   # --- 7. Microservicio int-geoapi ---
   int-geoapi:
-    build: ./int-geoapi
+    build: ./geoapi
     container_name: int-geoapi-app
     ports:
       - "9090:9090"
@@ -114,7 +114,7 @@ services:
 
   # --- 8. Microservicio integracion keycloak ---
   int-keycloak:
-    build: ./int-keycloak
+    build: ./keycloak
     container_name: int-keycloak-app
     ports:
       - "9091:8080"
