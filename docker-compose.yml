@@ -65,9 +65,9 @@ services:
       - backend
 
   # --- 5. Microservicio App Rutas (NUEVO) ---
-  rutas:
+  rutas-app:
     build: ./rutas  # 1. Apunta a la carpeta 'rutas' que contiene el Dockerfile
-    container_name: rutas
+    container_name: rutas-app
     ports:
       - "8181:8181" # 2. Mapea el puerto 8181 de tu PC al 8181 del contenedor
     environment:
@@ -86,9 +86,9 @@ services:
       - keycloak    # Se asegura que Keycloak inicie primero
 
   # --- 6. Microservicio Users ---
-  users:
+  users-app:
     build: ./users
-    container_name: users
+    container_name: users-app
     ports:
       - "8080:8080"
     environment:
@@ -106,7 +106,7 @@ services:
   # --- 7. Microservicio int-geoapi ---
   int-geoapi:
     build: ./int-geoapi
-    container_name: int-geoapi
+    container_name: int-geoapi-app
     ports:
       - "9090:9090"
     networks:
@@ -115,7 +115,7 @@ services:
   # --- 8. Microservicio integracion keycloak ---
   int-keycloak:
     build: ./int-keycloak
-    container_name: int-keycloak
+    container_name: int-keycloak-app
     ports:
       - "9091:8080"
     environment:
@@ -135,8 +135,8 @@ services:
       - backend
     depends_on:
       - keycloak
-      - rutas
-      - users
+      - rutas-app
+      - users-app
       - int-geoapi
       - int-keycloak
 

@@ -1,4 +1,4 @@
-package ar.edu.utn.frc.bda.k7.rutas.dtos.Maps;
+package ar.edu.utn.frc.bda.k7.rutas.clientes.geoapi.dtos;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
