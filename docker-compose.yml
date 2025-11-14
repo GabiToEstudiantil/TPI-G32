@@ -27,7 +27,7 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin123
     volumes:
-      - data-solicitudes:/var/lib/postgresql 
+      - data-solicitudes:/var/lib/postgresql
       - ./db-scripts/solicitudes:/docker-entrypoint-initdb.d #
     networks:
       - backend
@@ -43,7 +43,7 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin123
     volumes:
-      - data-rutas:/var/lib/postgresql 
+      - data-rutas:/var/lib/postgresql
       - ./db-scripts/rutas:/docker-entrypoint-initdb.d #
     networks:
       - backend
@@ -59,25 +59,22 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin123
     volumes:
-      - data-users:/var/lib/postgresql 
+      - data-users:/var/lib/postgresql
       - ./db-scripts/usuarios:/docker-entrypoint-initdb.d #
     networks:
       - backend
 
-  # --- 5. Microservicio App Rutas (NUEVO) ---
+  # --- 5. Microservicio App Rutas ---
   rutas-app:
-    build: ./rutas  # 1. Apunta a la carpeta 'rutas' que contiene el Dockerfile
+    build: ./rutas
     container_name: rutas-app
     ports:
-      - "8181:8181" # 2. Mapea el puerto 8181 de tu PC al 8181 del contenedor
+      - "8181:8080"
     environment:
-      # --- Conexión a la Base de Datos 'db-rutas' ---
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-rutas:5432/DB_RUTAS
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin123
       
-      # --- Conexión a Keycloak (para Spring Security) ---
-      # 3. URL para validar tokens. ¡Asegúrate que 'tpi-backend' es tu realm!
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/tpi-backend
     networks:
       - backend
@@ -108,7 +105,7 @@ services:
     build: ./geoapi
     container_name: int-geoapi-app
     ports:
-      - "9090:9090"
+      - "9090:8080"
     networks:
       - backend
 
@@ -139,6 +136,22 @@ services:
       - users-app
       - int-geoapi
       - int-keycloak
+
+  # --- 10. Microservicio Solicitudes ---
+  solicitudes-app:
+    build: ./solicitudes
+    container_name: solicitudes-app
+    ports:
+      - "8180:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-users:5432/DB_SOLICITUDES
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/tpi-backend
+    networks:
+      - backend
+    depends_on:
+      - keycloak
 
 # --- Volúmenes (Discos duros) ---
 volumes:
