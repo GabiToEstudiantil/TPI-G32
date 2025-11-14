@@ -49,4 +49,8 @@ public class TarifaCombustibleService {
     public TarifaCombustible findTarifaById(Integer tarifaId) {
         return tarifaCombustibleRepo.findById(tarifaId).orElse(null);
     }
+
+    public TarifaCombustible getPrimeraTarifa() {
+        return tarifaCombustibleRepo.findFirstByOrderByIdAsc();
+    }
 }

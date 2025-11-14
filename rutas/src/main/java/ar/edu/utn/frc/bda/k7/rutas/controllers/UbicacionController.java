@@ -28,21 +28,14 @@ public class UbicacionController {
 
     @PostMapping
     public ResponseEntity<Ubicacion> postUbicacion(@RequestBody UbicacionDTO dto) {
+        // necesitamos una dirección O coordenadas
         if (dto.getDireccionTextual() == null &&
-            (dto.getLatitud() == null ||
-            dto.getLongitud() == null)) {
+            (dto.getLatitud() == null || dto.getLongitud() == null)) {
                 return ResponseEntity.badRequest().build();
         }
-        if (ubicacionService.getUbicacionById(dto.getId()) != null) {
-            return ResponseEntity.status(409).build();
-        }
-        if (dto.getDireccionTextual() == null) {
-            //aca buscar la direccion textual con el maps
-        }
-        if (dto.getLatitud() == null || dto.getLongitud() == null) {
-            //aca buscar latitud y longitud con el maps
-        }
+
         Ubicacion savedEntity = ubicacionService.saveUbicacion(dto);
+        
         return ResponseEntity.status(201).body(savedEntity);
     }
     

@@ -3,8 +3,13 @@ package ar.edu.utn.frc.bda.k7.rutas.controllers;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import ar.edu.utn.frc.bda.k7.rutas.clientes.geoapi.dtos.GeoapiDTO;
+import ar.edu.utn.frc.bda.k7.rutas.dtos.EstimarCostoRequestDTO;
+import ar.edu.utn.frc.bda.k7.rutas.dtos.RutaCalculadaDTO;
 import ar.edu.utn.frc.bda.k7.rutas.services.RutaService;
 import lombok.AllArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -16,11 +21,24 @@ public class RutaController {
 
     private final RutaService rutaService;
 
-    @PostMapping("/estimas-costo")
-    public Double estimarCosto(@RequestBody String peso, String volumen, String idOrigen, String idDestino) {
-        Class <?> resCamino = rutaService.construirRuta(Integer.parseInt(idOrigen), Integer.parseInt(idDestino));
+    @PostMapping("/estimar-costo")
+    public ResponseEntity<RutaCalculadaDTO> estimarCosto(@RequestBody EstimarCostoRequestDTO request) {
+        
+        // Validaciones básicas de entrada
+        if (request.getIdOrigen() == null || request.getIdDestino() == null ||
+            request.getPeso() == null || request.getVolumen() == null) {
+            return ResponseEntity.badRequest().build();
+        }
 
-        return 0.0;
+        try {
+            RutaCalculadaDTO dto = rutaService.estimarCostoRuta(request);
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            // Si algo falla (ej. Tarifa no encontrada),
+            // devolvemos un 400.
+            System.err.println("Error al estimar costo: " + e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
     
 }

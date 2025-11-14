@@ -4,18 +4,21 @@ import java.util.ArrayList;
 
 import org.springframework.stereotype.Service;
 
+import ar.edu.utn.frc.bda.k7.rutas.clientes.geoapi.GeoApiClient;
 import ar.edu.utn.frc.bda.k7.rutas.dtos.UbicacionDTO;
 import ar.edu.utn.frc.bda.k7.rutas.entities.Ubicacion;
 import ar.edu.utn.frc.bda.k7.rutas.repositories.UbicacionRepo;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
+import ar.edu.utn.frc.bda.k7.rutas.clientes.geoapi.dtos.GeocodingDTO;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UbicacionService {
     
     private final UbicacionRepo ubicacionRepo;
     private final CiudadService ciudadService;
+    private final GeoApiClient geoApiClient;
 
     //Mappers
     public UbicacionDTO toDTO(Ubicacion entity) {
@@ -24,7 +27,9 @@ public class UbicacionService {
         dto.setLatitud(entity.getLatitud());
         dto.setLongitud(entity.getLongitud());
         dto.setDireccionTextual(entity.getDireccionTextual());
-        dto.setCiudad(ciudadService.toDTO(entity.getCiudad()));
+        if (entity.getCiudad() != null) {
+            dto.setCiudad(ciudadService.toDTO(entity.getCiudad()));
+        }
         return dto;
     }
 
@@ -34,7 +39,9 @@ public class UbicacionService {
         entity.setLatitud(dto.getLatitud());
         entity.setLongitud(dto.getLongitud());
         entity.setDireccionTextual(dto.getDireccionTextual());
-        entity.setCiudad(ciudadService.toCiudad(dto.getCiudad()));
+        if (dto.getCiudad() != null) {
+            entity.setCiudad(ciudadService.toCiudad(dto.getCiudad()));
+        }
         return entity;
     }
     //FIN Mappers
@@ -48,11 +55,29 @@ public class UbicacionService {
     }
 
     public UbicacionDTO getUbicacionById(Integer ubicacionId) {
-        return toDTO(ubicacionRepo.findById(ubicacionId).orElse(null));
+        Ubicacion entity = ubicacionRepo.findById(ubicacionId).orElse(null);
+        return (entity != null) ? toDTO(entity) : null;
     }
 
     @Transactional
     public Ubicacion saveUbicacion(UbicacionDTO dto) {
+        
+        // Si no tenemos lat/lng pero sí dirección...
+        if (dto.getDireccionTextual() != null && (dto.getLatitud() == null || dto.getLongitud() == null)) {
+            GeocodingDTO geoInfo = geoApiClient.geocode(dto.getDireccionTextual());
+            if (geoInfo != null) {
+                dto.setLatitud(geoInfo.getLat());
+                dto.setLongitud(geoInfo.getLng());
+            }
+        }
+        // Si no tenemos dirección pero sí lat/lng...
+        else if (dto.getDireccionTextual() == null && (dto.getLatitud() != null && dto.getLongitud() != null)) {
+            GeocodingDTO geoInfo = geoApiClient.reverseGeocode(dto.getLatitud(), dto.getLongitud());
+            if (geoInfo != null) {
+                dto.setDireccionTextual(geoInfo.getFormattedAddress());
+            }
+        }
+
         Ubicacion entity = toUbicacion(dto);
         return ubicacionRepo.save(entity);
     }

@@ -1,6 +1,8 @@
 package ar.edu.utn.frc.bda.k7.rutas.services;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ public class CamionService {
 
     //Mappers
     public CamionDTO toDto(Camion camion) {
+        if (camion == null) return null;
         CamionDTO camionDTO = new CamionDTO();
         camionDTO.setDominio(camion.getDominio());
         camionDTO.setTransportistaLegajo(camion.getTransportistaLegajo());
@@ -29,6 +32,7 @@ public class CamionService {
     }
 
     public Camion toCamion(CamionDTO dto) {
+        if (dto == null) return null;
         Camion camion = new Camion();
         camion.setDominio(dto.getDominio());
         camion.setTransportistaLegajo(dto.getTransportistaLegajo());
@@ -60,6 +64,13 @@ public class CamionService {
     @Transactional
     public void deleteCamion(CamionDTO dto) {
         camionRepo.delete(toCamion(dto));
+    }
+
+    public List<CamionDTO> findCamionesDisponibles(Double peso, Double volumen) {
+        List<Camion> camiones = camionRepo.findDisponiblesByCapacidad(peso, volumen);
+        return camiones.stream()
+                    .map(this::toDto)
+                    .collect(Collectors.toList());
     }
 
 }

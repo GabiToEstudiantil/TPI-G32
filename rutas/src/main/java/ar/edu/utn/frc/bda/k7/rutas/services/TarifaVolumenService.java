@@ -54,4 +54,8 @@ public class TarifaVolumenService {
         return tarifaVolumenRepo.findById(tarifaId).orElse(null);
     }
 
+    public TarifaVolumen findByVolumen(Double volumen) {
+        return tarifaVolumenRepo.findByVolumen(volumen);
+    }
+
 }
