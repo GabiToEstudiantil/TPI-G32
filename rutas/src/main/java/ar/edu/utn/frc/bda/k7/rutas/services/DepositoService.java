@@ -47,8 +47,6 @@ public class DepositoService {
 
     @Transactional
     public Deposito saveDeposito(DepositoDTO dto) {
-        //Re vividito aca pero le podria pasar un condicional que si no tiene textual
-        //o si no tiene long y lat, haga peticion al maps para autocompletar el campo q falta.
         Deposito deposito = toDeposito(dto);
         return depositoRepo.save(deposito);
     }

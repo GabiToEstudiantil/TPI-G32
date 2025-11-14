@@ -13,7 +13,7 @@ import ar.edu.utn.frc.bda.k7.users.dto.ClienteDTO;
 @AllArgsConstructor
 public class ClienteService {
 
-    private ClientRepository clienteRepository;
+    private final ClientRepository clienteRepository;
 
     public ClienteDTO toDto(Cliente cliente) {
         ClienteDTO clienteDTO = new ClienteDTO();

@@ -1,5 +1,6 @@
 package ar.edu.frc.utn.bda.k7.solicitudes.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,11 +20,16 @@ public class Contenedor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
+    
+    @Column(name = "codigo_identificacion")
     private String codigoIdentificacion;
+    @Column(name = "peso")
     private Double peso;
+    @Column(name = "volumen")
     private Double volumen;
+    @Column(name = "estado")
     private String estado;
+    @Column(name = "cliente_dni")
     private String clienteDni;
 
 }

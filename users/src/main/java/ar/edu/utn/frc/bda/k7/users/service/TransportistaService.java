@@ -13,7 +13,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class TransportistaService {
     
-    private TransportistaRepository transportistaRepository;
+    private final TransportistaRepository transportistaRepository;
 
     public TransportistaDTO toDto(Transportista transportista) {
         TransportistaDTO transportistaDTO = new TransportistaDTO();
