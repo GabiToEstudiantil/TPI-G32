@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.Contenedor;
 
 public interface ContenedorRepo extends JpaRepository<Contenedor, Integer> {
-    // Aca un comentario pq queda feo completamente vacio hasta que le agreguemos alguno personalizado
     
+    Contenedor findByCodigoIdentificacion(String codigo);
 }

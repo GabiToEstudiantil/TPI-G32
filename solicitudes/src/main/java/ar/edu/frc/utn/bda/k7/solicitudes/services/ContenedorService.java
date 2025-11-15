@@ -42,4 +42,8 @@ public class ContenedorService {
     public Contenedor save(Contenedor contenedor) {
         return contenedorRepo.save(contenedor);
     }
+
+    public Contenedor findByCodigoIdentificacion(String codigo) {
+        return contenedorRepo.findByCodigoIdentificacion(codigo);
+    }
 }

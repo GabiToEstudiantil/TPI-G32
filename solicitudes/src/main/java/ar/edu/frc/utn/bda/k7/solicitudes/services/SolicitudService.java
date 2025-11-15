@@ -109,13 +109,23 @@ public class SolicitudService {
             throw new RuntimeException("No se pudo calcular la ruta.");
         }
 
-        // 3. Creamos y guardamos el Contenedor
-        Contenedor contenedor = new Contenedor();
-        contenedor.setCodigoIdentificacion(request.getCodigoContenedor());
-        contenedor.setPeso(request.getPeso());
-        contenedor.setVolumen(request.getVolumen());
-        contenedor.setEstado(ContenedorEstado.DISPONIBLE);
-        contenedor.setClienteDni(request.getClienteDni());
+        // 3. Si el contenedor no existe, lo creamos; si existe y está disponible, lo asignamos; si está en tránsito o en depósito, error
+        Contenedor contenedor = contenedorService.findByCodigoIdentificacion(request.getCodigoContenedor());
+        if (contenedor == null) {
+            contenedor = new Contenedor();
+            contenedor.setCodigoIdentificacion(request.getCodigoContenedor());
+            contenedor.setPeso(request.getPeso());
+            contenedor.setVolumen(request.getVolumen());
+            contenedor.setEstado(ContenedorEstado.ASIGNADO);
+            contenedor.setClienteDni(request.getClienteDni());
+        } else {
+            if (contenedor.getEstado() == ContenedorEstado.EN_TRANSITO || contenedor.getEstado() == ContenedorEstado.EN_DEPOSITO) {
+                throw new IllegalStateException("El contenedor ya está en tránsito o en depósito.");
+            }
+            contenedor.setPeso(request.getPeso()); // Capaz lleva algo adentro el contenedor
+            // No le cambio el volumen pq no tendría sentido q el contenedor cambie de volumen xd
+            contenedor.setEstado(ContenedorEstado.ASIGNADO);
+        }
         Contenedor contenedorGuardado = contenedorService.save(contenedor);
 
         // 4. Creamos y guardamos la Solicitud
