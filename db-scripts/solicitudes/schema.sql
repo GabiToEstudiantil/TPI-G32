@@ -17,6 +17,7 @@ CREATE TYPE tramo_estado AS ENUM (
 
 CREATE TYPE contenedor_estado AS ENUM (
     'DISPONIBLE',
+    'ASIGNADO',
     'EN_TRANSITO',
     'EN_DEPOSITO'
 );
@@ -29,7 +30,7 @@ CREATE TABLE contenedores (
     codigo_identificacion VARCHAR(100) UNIQUE NOT NULL,
     peso DECIMAL(10, 2) NOT NULL,
     volumen DECIMAL(10, 2) NOT NULL,
-    estado VARCHAR(50) DEFAULT 'Disponible',
+    estado contenedor_estado DEFAULT 'DISPONIBLE',
     cliente_dni VARCHAR(100) NOT NULL -- FK Lógica a db_usuarios.Cliente
 );
 
