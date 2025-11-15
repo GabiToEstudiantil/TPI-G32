@@ -30,8 +30,9 @@ public class CamionController {
     private final CamionService camionService;
 
     @GetMapping
-    public List<CamionDTO> getCamiones() {
-        return camionService.getAllCamiones();
+    public ResponseEntity<List<CamionDTO>> getCamiones() {
+        List<CamionDTO> camiones = camionService.getAllCamiones();
+        return ResponseEntity.ok(camiones);
     }
 
     @PostMapping

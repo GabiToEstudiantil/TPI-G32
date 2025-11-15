@@ -10,10 +10,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.CrearSolicitudRequestDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.SolicitudDTO;
+import ar.edu.frc.utn.bda.k7.solicitudes.dtos.TrackingDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.services.SolicitudService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @RestController
@@ -24,8 +27,9 @@ public class SolicitudController {
     private final SolicitudService solicitudService;
 
     @GetMapping
-    public List<SolicitudDTO> getSolicitudes(){
-        return solicitudService.obtenerTodas();
+    public ResponseEntity<List<SolicitudDTO>> getSolicitudes(){
+        List<SolicitudDTO> solicitudes = solicitudService.obtenerTodas();
+        return ResponseEntity.ok(solicitudes);
     }
 
     @GetMapping("/{solicitudId}")
@@ -68,6 +72,17 @@ public class SolicitudController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping("/{solicitudId}/tracking")
+    public ResponseEntity<?> obtenerTracking(@RequestParam Integer solicitudId) {
+        try {
+            TrackingDTO tracking = solicitudService.trackingSolicitud(solicitudId);
+            return ResponseEntity.ok(tracking);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al obtener el tracking: " + e.getMessage());
+        }
+    }
+    
     
 }
 

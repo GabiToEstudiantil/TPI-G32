@@ -60,7 +60,7 @@ public class UbicacionService {
     }
 
     @Transactional
-    public Ubicacion saveUbicacion(UbicacionDTO dto) {
+    public UbicacionDTO saveUbicacion(UbicacionDTO dto) {
         
         // Si no tenemos lat/lng pero sí dirección...
         if (dto.getDireccionTextual() != null && (dto.getLatitud() == null || dto.getLongitud() == null)) {
@@ -79,6 +79,7 @@ public class UbicacionService {
         }
 
         Ubicacion entity = toUbicacion(dto);
-        return ubicacionRepo.save(entity);
+        UbicacionDTO savedEntity = toDTO(ubicacionRepo.save(entity));
+        return savedEntity;
     }
 }

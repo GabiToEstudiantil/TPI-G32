@@ -32,8 +32,8 @@ public class ClienteController {
     }
 
     @GetMapping
-    public List<ClienteDTO> obtenerTodosLosClientes(){
-        return clienteService.obtenerTodos();
+    public ResponseEntity<List<ClienteDTO>> obtenerTodosLosClientes(){
+        return ResponseEntity.ok(clienteService.obtenerTodos());
     }
 
     @PostMapping

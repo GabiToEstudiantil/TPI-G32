@@ -1,8 +1,11 @@
 package ar.edu.frc.utn.bda.k7.solicitudes.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import ar.edu.frc.utn.bda.k7.solicitudes.domain.Ruta;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.Tramo;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.TramoDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.repositories.TramoRepo;
@@ -56,6 +59,10 @@ public class TramoService {
     @Transactional
     public Tramo save(Tramo tramo) {
         return tramoRepo.save(tramo);
+    }
+
+    public List<Tramo> getTramosByRutaOrdenados(Ruta ruta) {
+        return tramoRepo.findByRutaOrderByOrdenEnRutaAsc(ruta);
     }
 
 }

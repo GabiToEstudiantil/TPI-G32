@@ -46,4 +46,8 @@ public class RutaService {
     public Ruta save(Ruta ruta) {
         return rutaRepo.save(ruta);
     }
+
+    public Ruta getRutaBySolicitudId(Integer solicitudId) {
+        return rutaRepo.findBySolicitudId(solicitudId);
+    }
 }

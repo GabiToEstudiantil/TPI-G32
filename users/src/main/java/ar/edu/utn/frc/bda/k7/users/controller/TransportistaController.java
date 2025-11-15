@@ -24,16 +24,16 @@ public class TransportistaController {
 
     @GetMapping("/{legajo}")
     public ResponseEntity<TransportistaDTO> obtenerPorLegajo(@PathVariable Integer legajo) {
-       TransportistaDTO dto = transportistaService.buscarPorLegajo(legajo);
-       if (dto == null) {
+        TransportistaDTO dto = transportistaService.buscarPorLegajo(legajo);
+        if (dto == null) {
         return ResponseEntity.notFound().build();
-       }
-       return ResponseEntity.ok(dto);
+        }
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping
-    public List<TransportistaDTO> obtenerTodosLosTransportistas(){
-        return transportistaService.obtenerTodos();
+    public ResponseEntity<List<TransportistaDTO>> obtenerTodosLosTransportistas(){
+        return ResponseEntity.ok(transportistaService.obtenerTodos());
     }
 
     @PostMapping

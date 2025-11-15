@@ -46,9 +46,10 @@ public class DepositoService {
     }
 
     @Transactional
-    public Deposito saveDeposito(DepositoDTO dto) {
+    public DepositoDTO saveDeposito(DepositoDTO dto) {
         Deposito deposito = toDeposito(dto);
-        return depositoRepo.save(deposito);
+        Deposito depositoGuardado = depositoRepo.save(deposito);
+        return toDTO(depositoGuardado);
     }
 
     public DepositoDTO getDepositoById(Integer depositoId) {

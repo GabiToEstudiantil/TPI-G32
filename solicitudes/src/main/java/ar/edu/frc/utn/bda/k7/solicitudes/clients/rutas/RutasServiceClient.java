@@ -5,6 +5,7 @@ import org.springframework.web.client.RestClient;
 
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.EstimarCostoRequestDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.RutaCalculadaDTO;
+import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.UbicacionDTO;
 
 import org.springframework.http.MediaType;
 
@@ -27,6 +28,18 @@ public class RutasServiceClient {
                     .body(RutaCalculadaDTO.class);
         } catch (Exception e) {
             System.err.println("Error al llamar a ms-rutas: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public UbicacionDTO getUbicacionById(Integer ubicacionId) {
+        try {
+            return restClient.get()
+                    .uri("/api/ruta/ubicaciones/{id}", ubicacionId)
+                    .retrieve()
+                    .body(UbicacionDTO.class);
+        } catch (Exception e) {
+            System.err.println("Error al llamar a ms-rutas para obtener ubicacion: " + e.getMessage());
             return null;
         }
     }

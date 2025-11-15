@@ -1,5 +1,7 @@
 package ar.edu.frc.utn.bda.k7.solicitudes.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,5 +47,14 @@ public class ContenedorService {
 
     public Contenedor findByCodigoIdentificacion(String codigo) {
         return contenedorRepo.findByCodigoIdentificacion(codigo);
+    }
+
+    public List<ContenedorDTO> obtenerPorDniCliente(String dni) {
+        List<Contenedor> contenedores = contenedorRepo.findByClienteDni(dni);
+        return contenedores.stream().map(this::toDto).toList();
+    }
+
+    public Contenedor obtenerPorId(Integer contenedorId) {
+        return contenedorRepo.findById(contenedorId).orElse(null);
     }
 }

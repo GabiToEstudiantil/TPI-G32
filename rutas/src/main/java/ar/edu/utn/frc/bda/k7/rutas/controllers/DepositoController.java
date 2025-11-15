@@ -23,12 +23,13 @@ public class DepositoController {
     private final DepositoService depositoService;
 
     @GetMapping
-    public List<DepositoDTO> getDepositos() {
-        return depositoService.getAllDepositos();
+    public ResponseEntity<List<DepositoDTO>> getDepositos() {
+        List<DepositoDTO> depositos = depositoService.getAllDepositos();
+        return ResponseEntity.ok(depositos);
     }
 
     @PostMapping
-    public ResponseEntity<Deposito> postDeposito(@RequestBody DepositoDTO dto) {
+    public ResponseEntity<DepositoDTO> postDeposito(@RequestBody DepositoDTO dto) {
         if (dto.getNombre() == null || dto.getCostoEstadiaDiario() == null ||
             (dto.getUbicacion().getDireccionTextual() == null &&
             dto.getUbicacion().getLatitud() == null && dto.getUbicacion().getLongitud() == null)) {
@@ -37,12 +38,12 @@ public class DepositoController {
         if (depositoService.getDepositoById(dto.getId()) != null) {
             return ResponseEntity.status(409).build();
         }
-        Deposito entity = depositoService.saveDeposito(dto);
+        DepositoDTO entity = depositoService.saveDeposito(dto);
         return ResponseEntity.status(201).body(entity);
     }
 
     @PutMapping("/{depositoId}")
-    public ResponseEntity<Deposito> putDeposito(@PathVariable String depositoId, @RequestBody DepositoDTO dto) {
+    public ResponseEntity<DepositoDTO> putDeposito(@PathVariable String depositoId, @RequestBody DepositoDTO dto) {
         if (dto.getNombre() == null || dto.getCostoEstadiaDiario() == null ||
             (dto.getUbicacion().getDireccionTextual() == null &&
             dto.getUbicacion().getLatitud() == null && dto.getUbicacion().getLongitud() == null)) {
@@ -53,7 +54,7 @@ public class DepositoController {
             return ResponseEntity.notFound().build();
         }
         
-        Deposito entity = depositoService.saveDeposito(dto);
+        DepositoDTO entity = depositoService.saveDeposito(dto);
         return ResponseEntity.status(201).body(entity);
     }
     

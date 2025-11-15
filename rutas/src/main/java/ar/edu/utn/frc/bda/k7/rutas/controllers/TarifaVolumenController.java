@@ -28,12 +28,12 @@ public class TarifaVolumenController {
     private final TarifaVolumenService tarifaVolumenService;
 
     @GetMapping
-    public List<TarifaVolumenDTO> getTarifasVolumen() {
-        return tarifaVolumenService.getAllTarifasVolumen();
+    public ResponseEntity<List<TarifaVolumenDTO>> getTarifasVolumen() {
+        return ResponseEntity.ok(tarifaVolumenService.getAllTarifasVolumen());
     }
 
     @PostMapping
-    public ResponseEntity<TarifaVolumen> postTarifaVolumen(@RequestBody TarifaVolumenDTO dto) {
+    public ResponseEntity<TarifaVolumenDTO> postTarifaVolumen(@RequestBody TarifaVolumenDTO dto) {
         if (dto.getVolumenMin() == null || dto.getVolumenMax() == null ||
             dto.getCostoKmBase() == null) {
                 return ResponseEntity.badRequest().build();
@@ -58,12 +58,12 @@ public class TarifaVolumenController {
             return ResponseEntity.status(409).build();
         }
         //Fin de quilombo
-        TarifaVolumen entity = tarifaVolumenService.saveTarifaVolumen(dto);
+        TarifaVolumenDTO entity = tarifaVolumenService.saveTarifaVolumen(dto);
         return ResponseEntity.status(201).body(entity);
     }
 
     @PutMapping("/{tarifaId}")
-    public ResponseEntity<TarifaVolumen> putTarifaVolumen(@PathVariable String tarifaId, @RequestBody TarifaVolumenDTO dto) {
+    public ResponseEntity<TarifaVolumenDTO> putTarifaVolumen(@PathVariable String tarifaId, @RequestBody TarifaVolumenDTO dto) {
         if (dto.getVolumenMin() == null || dto.getVolumenMax() == null ||
             dto.getCostoKmBase() == null) {
                 return ResponseEntity.badRequest().build();
@@ -88,7 +88,7 @@ public class TarifaVolumenController {
         if (seCruza) {
             return ResponseEntity.status(409).build();
         }
-        TarifaVolumen entity = tarifaVolumenService.saveTarifaVolumen(dto);
+        TarifaVolumenDTO entity = tarifaVolumenService.saveTarifaVolumen(dto);
         return ResponseEntity.status(201).body(entity);
     }
     

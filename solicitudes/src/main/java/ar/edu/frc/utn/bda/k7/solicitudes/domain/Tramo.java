@@ -56,4 +56,7 @@ public class Tramo {
 
     @Column(name = "camion_dominio")
     private String camionDominio;
+
+    @Column(name = "orden_en_ruta")
+    private Integer ordenEnRuta;
 }

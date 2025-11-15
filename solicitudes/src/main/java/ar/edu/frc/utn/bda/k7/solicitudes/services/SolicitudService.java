@@ -2,6 +2,8 @@ package ar.edu.frc.utn.bda.k7.solicitudes.services;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,15 +12,18 @@ import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.CrearSolicitudReques
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.EstimarCostoRequestDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.RutaCalculadaDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.TramoRutaDTO;
+import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.UbicacionDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.Contenedor;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.ContenedorEstado;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.ParadaEnDeposito;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.Ruta;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.Solicitud;
+import ar.edu.frc.utn.bda.k7.solicitudes.domain.SolicitudEstado;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.Tramo;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.TramoEstado;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.TramoTipo;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.SolicitudDTO;
+import ar.edu.frc.utn.bda.k7.solicitudes.dtos.TrackingDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.repositories.SolicitudRepo;
 import lombok.AllArgsConstructor;
 
@@ -161,7 +166,8 @@ public class SolicitudService {
             tramo.setDistanciaKm(tramoRuta.getRutaDelTramo().getKilometros());
             tramo.setCostoAproximado(tramoRuta.getCostoEstimado());
             tramo.setCamionDominio(tramoRuta.getCamionAsignado().getDominio());
-            tramo.setEstado(TramoEstado.ESTIMADO);
+            tramo.setOrdenEnRuta(cant);
+            tramo.setEstado(TramoEstado.ASIGNADO);
             
             if (cant == 1) { // Es el primer tramo
                 tramo.setOrigenId(request.getOrigenId());
@@ -207,4 +213,84 @@ public class SolicitudService {
     }
     // ------------------------------------------------ FIN POST DE SOLICITUD ------------------------------------------------
 
+    public TrackingDTO trackingSolicitud(Integer solicitudId) {
+
+        Ruta ruta = rutaService.getRutaBySolicitudId(solicitudId);
+
+        List<Tramo> tramos = tramoService.getTramosByRutaOrdenados(ruta);
+        if (tramos.isEmpty()) {
+            throw new RuntimeException("La ruta no tiene tramos...");
+        }
+
+        int tramosCompletados = 0;
+        Tramo tramoActual = null;
+        SolicitudEstado estadoGeneral = SolicitudEstado.PENDIENTE_ASIGNACION;
+
+        //Buscamos el estado actual revisando los estados de los tramos en orden
+        for (Tramo tramo : tramos) {
+            if (tramo.getEstado() == TramoEstado.CANCELADO) {
+                estadoGeneral = SolicitudEstado.CANCELADA;
+                tramoActual = tramo;
+                break; //Si está cancelado, no importa el resto
+            }
+            if (tramo.getEstado() == TramoEstado.INICIADO) {
+                estadoGeneral = SolicitudEstado.EN_TRANSITO;
+                tramoActual = tramo;
+                break; //Si está iniciado, no importa el resto
+            }
+            if (tramo.getEstado() == TramoEstado.FINALIZADO) {
+                tramosCompletados++; //Contamos los tramos finalizados
+            }
+            //Si no está en ninguno de los otros 3 estados, puede ser ASIGNADO o ESTIMADO
+            if (tramoActual == null && (tramo.getEstado() == TramoEstado.ASIGNADO || tramo.getEstado() == TramoEstado.ESTIMADO)) {
+                tramoActual = tramo;
+                estadoGeneral = (tramo.getEstado() == TramoEstado.ASIGNADO) ? SolicitudEstado.LISTA_PARA_INICIAR : SolicitudEstado.PENDIENTE_ASIGNACION;
+                break; //Si encontramos el primer tramo no iniciado, lo tomamos como actual
+            }
+        }
+
+        if (tramosCompletados == tramos.size()) {
+            estadoGeneral = SolicitudEstado.FINALIZADA;
+            tramoActual = tramos.get(tramos.size() - 1); //El último tramo
+        }
+
+        if (tramoActual == null) { // Requete por las dudas, no deberia pasar nunca
+            throw new RuntimeException("No se pudo determinar el tramo actual.");
+        }
+
+        String desc = "Upsi, perdimos tu contenedor, disculpa :(, pero seguinos eligiendo :D";
+        try {
+            // Buscamos para poder armar la descripcion linda
+            String origen = rutasServiceClient.getUbicacionById(tramoActual.getOrigenId()).getDireccionTextual();
+            String destino = rutasServiceClient.getUbicacionById(tramoActual.getDestinoId()).getDireccionTextual();
+
+            if (estadoGeneral == SolicitudEstado.EN_TRANSITO) {
+                desc = "En viaje de " + origen + " a " + destino;
+            }
+            else if (estadoGeneral == SolicitudEstado.LISTA_PARA_INICIAR) {
+                desc = "Listo para iniciar viaje desde " + origen + " hacia " + destino;
+            }
+            else if (estadoGeneral == SolicitudEstado.PENDIENTE_ASIGNACION) {
+                desc = "Todavia no lo asignamos, pero está en " + origen;
+            }
+            else if (estadoGeneral == SolicitudEstado.FINALIZADA) {
+                desc = "Ya llegó a " + destino;
+            }
+            else if (estadoGeneral == SolicitudEstado.CANCELADA) {
+                desc = "Ya la cancelaste, está en " + origen;
+            }
+
+        } catch (Exception e) {
+            desc = "No lo perdimos, pero no lo encontramos en este momento, no me anda el servicio, intenta mas tarde. Disculpa :(";
+        }
+        return new TrackingDTO(
+            solicitudId,
+            estadoGeneral,
+            desc,
+            tramoActual.getCamionDominio(),
+            tramosCompletados,
+            tramos.size()
+        );
+
+    }
 }

@@ -45,9 +45,10 @@ public class TarifaVolumenService {
     }
 
     @Transactional
-    public TarifaVolumen saveTarifaVolumen(TarifaVolumenDTO dto) {
+    public TarifaVolumenDTO saveTarifaVolumen(TarifaVolumenDTO dto) {
         TarifaVolumen entity = toEntity(dto);
-        return tarifaVolumenRepo.save(entity);
+        TarifaVolumenDTO savedEntity = toDTO(tarifaVolumenRepo.save(entity));
+        return savedEntity;
     }
 
     public TarifaVolumen findTarifaById(Integer tarifaId) {

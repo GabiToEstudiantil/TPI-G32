@@ -41,9 +41,10 @@ public class TarifaCombustibleService {
     }
 
     @Transactional
-    public TarifaCombustible saveTarifaCombustible(TarifaCombustibleDTO dto) {
+    public TarifaCombustibleDTO saveTarifaCombustible(TarifaCombustibleDTO dto) {
         TarifaCombustible entity = toEntity(dto);
-        return tarifaCombustibleRepo.save(entity);
+        TarifaCombustible savedEntity = tarifaCombustibleRepo.save(entity);
+        return toDTO(savedEntity);
     }
     
     public TarifaCombustible findTarifaById(Integer tarifaId) {

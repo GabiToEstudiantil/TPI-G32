@@ -69,6 +69,7 @@ CREATE TABLE tramos (
     fecha_hora_fin TIMESTAMP,
     ruta_id INT NOT NULL,
     camion_dominio VARCHAR(20), -- FK Lógica a db_flota.Camion
+    orden_en_ruta INT NOT NULL,
     
     FOREIGN KEY (ruta_id) REFERENCES rutas(id)
 );

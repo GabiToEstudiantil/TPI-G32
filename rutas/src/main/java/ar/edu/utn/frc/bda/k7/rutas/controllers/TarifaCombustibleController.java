@@ -27,29 +27,30 @@ public class TarifaCombustibleController {
     private final TarifaCombustibleService tarifaCombustibleService;
 
     @GetMapping
-    public List<TarifaCombustibleDTO> getTarifasCombustible() {
-        return tarifaCombustibleService.getAllTarifas();
+    public ResponseEntity<List<TarifaCombustibleDTO>> getTarifasCombustible() {
+        List<TarifaCombustibleDTO> tarifas = tarifaCombustibleService.getAllTarifas();
+        return ResponseEntity.ok(tarifas);
     }
 
     @PostMapping
-    public ResponseEntity<TarifaCombustible> postTarifaCombustible(@RequestBody TarifaCombustibleDTO dto) {
+    public ResponseEntity<TarifaCombustibleDTO> postTarifaCombustible(@RequestBody TarifaCombustibleDTO dto) {
         if (dto.getNombre() == null || dto.getPrecioLitro() == null) {
             return ResponseEntity.badRequest().build();
         }
-        TarifaCombustible savedEntity = tarifaCombustibleService.saveTarifaCombustible(dto);
-        return ResponseEntity.ok(savedEntity);
+        TarifaCombustibleDTO savedEntity = tarifaCombustibleService.saveTarifaCombustible(dto);
+        return ResponseEntity.status(201).body(savedEntity);
     }
 
     @PutMapping("/{tarifaId}")
-    public ResponseEntity<TarifaCombustible> putTarifaCombustible(@PathVariable String tarifaId, @RequestBody TarifaCombustibleDTO dto) {
+    public ResponseEntity<TarifaCombustibleDTO> putTarifaCombustible(@PathVariable String tarifaId, @RequestBody TarifaCombustibleDTO dto) {
         if (dto.getNombre() == null || dto.getPrecioLitro() == null) {
             return ResponseEntity.badRequest().build();
         }
         if (tarifaCombustibleService.findTarifaById(Integer.parseInt(tarifaId)) == null) {
             return ResponseEntity.notFound().build();
         }
-        TarifaCombustible updatedEntity = tarifaCombustibleService.saveTarifaCombustible(dto);
-        return ResponseEntity.ok(updatedEntity);
+        TarifaCombustibleDTO updatedEntity = tarifaCombustibleService.saveTarifaCombustible(dto);
+        return ResponseEntity.status(204).body(updatedEntity);
     }
     
 }
