@@ -15,6 +15,11 @@ CREATE TYPE tramo_estado AS ENUM (
     'CANCELADO'
 );
 
+CREATE TYPE contenedor_estado AS ENUM (
+    'DISPONIBLE',
+    'EN_TRANSITO',
+    'EN_DEPOSITO'
+);
 -- 2. CREAR LAS TABLAS
 -- Nombres de tabla en plural y snake_case
 -- Nombres de columna en snake_case

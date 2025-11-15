@@ -1,6 +1,7 @@
 package ar.edu.frc.utn.bda.k7.solicitudes.services;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.Contenedor;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.ContenedorDTO;
@@ -36,4 +37,9 @@ public class ContenedorService {
         return contenedor;
     }
     // FIN Mappers
+
+    @Transactional
+    public Contenedor save(Contenedor contenedor) {
+        return contenedorRepo.save(contenedor);
+    }
 }

@@ -72,32 +72,31 @@ public class RutaService {
         }
 
         // 3. Calcular costos iterando sobre los tramos
-        double costoCombustibleTotal = 0.0;
-        double costoVolumenTotal = 0.0;
-        double costoEstadiaTotal = 0.0;
-        
-        for (TramoDTO tramo : tramos) { // 'tramos' ya es la List<TramoDTO>
+        double costoTotal = 0.0; // Arrancamos a contar
+
+        for (TramoDTO tramo : tramos) {
             double kilometrosTramo = tramo.getRutaDelTramo().getKilometros();
-            double consumoCamionTramo = tramo.getCamionAsignado().getConsumoCombustiblePromedio(); // L/Km
+            double consumoCamionTramo = tramo.getCamionAsignado().getConsumoCombustiblePromedio();
             
-            // Costo Combustible: (Km * L/Km) * $/L
-            costoCombustibleTotal += (kilometrosTramo * consumoCamionTramo) * tarifaComb.getPrecioLitro();
+            // Calcular costos individuales del tramo
+            double costoCombustibleTramo = (kilometrosTramo * consumoCamionTramo) * tarifaComb.getPrecioLitro();
+            double costoVolumenTramo = kilometrosTramo * tarifaVol.getCostoKmBase();
+            double costoEstadiaTramo = 0.0;
 
-            // Costo por Volumen (tarifa base): Km * $/Km
-            costoVolumenTotal += kilometrosTramo * tarifaVol.getCostoKmBase();
-
-            // Costo Estadía
             if (tramo.getDepositoParada() != null) {
-                costoEstadiaTotal += tramo.getDepositoParada().getCostoEstadiaDiario();
+                costoEstadiaTramo = tramo.getDepositoParada().getCostoEstadiaDiario();
             }
+
+            // Sumamos los costos del tramo y los guardamos
+            double costoTramo = costoCombustibleTramo + costoVolumenTramo + costoEstadiaTramo;
+            tramo.setCostoEstimado(costoTramo); // <-- ¡AQUÍ ESTÁ LA LÍNEA CLAVE!
+
+            // Sumamamos el costo del tramo al costo total general
+            costoTotal += costoTramo;
         }
-        
 
-        // 4. Calcular Costo Total
-        double costoTotal = costoCombustibleTotal + costoVolumenTotal + costoEstadiaTotal;
-
-        // 5. Devolver el DTO final con la LISTA DE TRAMOS original
-        return new RutaCalculadaDTO(tramos, costoTotal); // <-- Usamos 'tramos'
+        // 4. Devolvemos el DTO final
+        return new RutaCalculadaDTO(tramos, costoTotal);
     }
 
 
@@ -129,7 +128,11 @@ public class RutaService {
             camionEnDescanso = camionParaEsteTramo;
 
             if (rutaDirecta.getDuracionSegundos() <= maximoConduccionSegundos) {
-                tramosCalculados.add(new TramoDTO(rutaDirecta, camionParaEsteTramo, null));
+                TramoDTO tramoFinal = new TramoDTO();
+                tramoFinal.setRutaDelTramo(rutaDirecta);
+                tramoFinal.setCamionAsignado(camionParaEsteTramo);
+                tramoFinal.setDepositoParada(null);
+                tramosCalculados.add(tramoFinal);
                 break;
             }
 
@@ -152,7 +155,12 @@ public class RutaService {
                 throw new RuntimeException("No se pudo calcular la ruta al depósito seleccionado: " + direccionParada);
             }
 
-            tramosCalculados.add(new TramoDTO(rutaAlDepot, camionParaEsteTramo, mejorParada));
+            TramoDTO tramoIntermedio = new TramoDTO();
+            tramoIntermedio.setRutaDelTramo(rutaAlDepot);
+            tramoIntermedio.setCamionAsignado(camionParaEsteTramo);
+            tramoIntermedio.setDepositoParada(mejorParada);
+
+            tramosCalculados.add(tramoIntermedio);
 
             puntoActual = direccionParada;
             depositosDisponibles.remove(mejorParada);

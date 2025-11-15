@@ -1,6 +1,7 @@
 package ar.edu.frc.utn.bda.k7.solicitudes.services;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.Tramo;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.TramoDTO;
@@ -51,4 +52,10 @@ public class TramoService {
         return tramo;
     }
     //FIN Mappers
+
+    @Transactional
+    public Tramo save(Tramo tramo) {
+        return tramoRepo.save(tramo);
+    }
+
 }

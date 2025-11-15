@@ -1,6 +1,7 @@
 package ar.edu.frc.utn.bda.k7.solicitudes.services;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.ParadaEnDeposito;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.ParadaEnDepositoDTO;
@@ -42,4 +43,9 @@ public class ParadaEnDepositoService {
         return parada;
     }
     //FIN Mappers
+
+    @Transactional
+    public ParadaEnDeposito save(ParadaEnDeposito parada) {
+        return paradaRepo.save(parada);
+    }
 }

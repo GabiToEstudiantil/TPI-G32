@@ -1,6 +1,5 @@
-package ar.edu.utn.frc.bda.k7.rutas.dtos;
+package ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos;
 
-import ar.edu.utn.frc.bda.k7.rutas.clientes.geoapi.dtos.GeoapiDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,13 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TramoDTO {
-    
+public class TramoRutaDTO {
     private GeoapiDTO rutaDelTramo;
-
     private CamionDTO camionAsignado;
-
     private DepositoDTO depositoParada;
-
     private Double costoEstimado;
 }
