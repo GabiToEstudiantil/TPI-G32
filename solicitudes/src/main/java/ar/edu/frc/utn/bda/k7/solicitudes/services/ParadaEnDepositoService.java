@@ -1,18 +1,24 @@
 package ar.edu.frc.utn.bda.k7.solicitudes.services;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.ParadaEnDeposito;
+import ar.edu.frc.utn.bda.k7.solicitudes.domain.Ruta;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.ParadaEnDepositoDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.repositories.ParadaEnDepositoRepo;
+import ar.edu.frc.utn.bda.k7.solicitudes.repositories.RutaRepo;
 import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
 public class ParadaEnDepositoService {
 
-    private final RutaService rutaService;
+    private final RutaRepo rutaRepo;
     
     private final ParadaEnDepositoRepo paradaRepo;
 
@@ -22,7 +28,7 @@ public class ParadaEnDepositoService {
         dto.setId(parada.getId());
         dto.setFechaHoraLlegada(parada.getFechaHoraLlegada());
         dto.setFechaHoraSalida(parada.getFechaHoraSalida());
-        dto.setDiasEstadia(parada.getDiasEstadia());
+        dto.setSegundosEstadia(parada.getSegundosEstadia());
         dto.setCostoTotalEstadia(parada.getCostoTotalEstadia());
         dto.setOrdenEnRuta(parada.getOrdenEnRuta());
         dto.setRutaId(parada.getRuta().getId());
@@ -35,10 +41,11 @@ public class ParadaEnDepositoService {
         parada.setId(dto.getId());
         parada.setFechaHoraLlegada(dto.getFechaHoraLlegada());
         parada.setFechaHoraSalida(dto.getFechaHoraSalida());
-        parada.setDiasEstadia(dto.getDiasEstadia());
+        parada.setSegundosEstadia(dto.getSegundosEstadia());
         parada.setCostoTotalEstadia(dto.getCostoTotalEstadia());
         parada.setOrdenEnRuta(dto.getOrdenEnRuta());
-        parada.setRuta(rutaService.getRutaById(dto.getRutaId())); // Esto lo seteo en el RutaService cuando armo la ruta completa
+        parada.setRuta(rutaRepo.findById(dto.getRutaId()).orElseThrow(()
+            -> new RuntimeException("Ruta no encontrada con id: " + dto.getRutaId())));
         parada.setDepositoId(dto.getDepositoId());
         return parada;
     }
@@ -59,5 +66,29 @@ public class ParadaEnDepositoService {
         parada.setFechaHoraLlegada(java.time.LocalDateTime.now());
         ParadaEnDeposito paradaActualizada = save(parada);
         return toDto(paradaActualizada);
+    }
+
+    public ParadaEnDepositoDTO getParadaEnDepositoByRutaAndOrden (Ruta ruta, Integer ordenEnRuta) {
+        ParadaEnDeposito parada = paradaRepo.findByRutaIdAndOrdenEnRuta(ruta, ordenEnRuta);
+        return toDto(parada);
+    }
+
+    public ParadaEnDepositoDTO guardarTiempoEstadia(ParadaEnDepositoDTO paradaDto) {
+
+        ParadaEnDeposito parada = toParada(paradaDto); // Pasamos a entidad
+        parada.setFechaHoraSalida(LocalDateTime.now()); // Seteamos salida
+
+        LocalDateTime fechaHoraLlegada = parada.getFechaHoraLlegada(); // Obtenemos llegada
+        LocalDateTime fechaHoraSalida = parada.getFechaHoraSalida(); // Obtenemos salida
+
+        Long segundosEstadia = ChronoUnit.SECONDS.between(fechaHoraLlegada, fechaHoraSalida); // Calculamos duracion de estadia
+        parada.setSegundosEstadia(segundosEstadia); // Seteamos segundos de estadia
+        ParadaEnDeposito paradaActualizada = save(parada);
+        return toDto(paradaActualizada);
+    }
+
+    public List<ParadaEnDepositoDTO> getParadaEnDepositoByRuta(Ruta ruta) {
+        List<ParadaEnDeposito> paradas = paradaRepo.findByRuta(ruta);
+        return paradas.stream().map(this::toDto).toList();
     }
 }

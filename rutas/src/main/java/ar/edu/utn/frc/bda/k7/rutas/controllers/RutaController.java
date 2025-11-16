@@ -4,8 +4,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import ar.edu.utn.frc.bda.k7.rutas.clientes.geoapi.dtos.GeoapiDTO;
-import ar.edu.utn.frc.bda.k7.rutas.dtos.EstimarCostoRequestDTO;
-import ar.edu.utn.frc.bda.k7.rutas.dtos.RutaCalculadaDTO;
+import ar.edu.utn.frc.bda.k7.rutas.clientes.solicitudes.dtos.CalcularDefRequestDTO;
+import ar.edu.utn.frc.bda.k7.rutas.clientes.solicitudes.dtos.CalcularDefResponseDTO;
+import ar.edu.utn.frc.bda.k7.rutas.clientes.solicitudes.dtos.EstimarCostoRequestDTO;
+import ar.edu.utn.frc.bda.k7.rutas.clientes.solicitudes.dtos.RutaCalculadaDTO;
 import ar.edu.utn.frc.bda.k7.rutas.services.RutaService;
 import lombok.AllArgsConstructor;
 
@@ -40,5 +42,17 @@ public class RutaController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @PostMapping("/calcular-definitivo")
+    public ResponseEntity<CalcularDefResponseDTO> calcularDefinitivo(@RequestBody CalcularDefRequestDTO request) {
+        try {
+            CalcularDefResponseDTO dto = rutaService.calcularDefinitivo(request);
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            System.err.println("Error al calcular definitivo: " + e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
     
 }

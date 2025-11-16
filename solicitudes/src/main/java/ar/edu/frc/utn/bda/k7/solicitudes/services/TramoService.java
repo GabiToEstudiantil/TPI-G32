@@ -9,7 +9,7 @@ import ar.edu.frc.utn.bda.k7.solicitudes.domain.Ruta;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.Tramo;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.TramoEstado;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.TramoDTO;
-import ar.edu.frc.utn.bda.k7.solicitudes.dtos.TramoEstadoPatchDTO;
+import ar.edu.frc.utn.bda.k7.solicitudes.repositories.RutaRepo;
 import ar.edu.frc.utn.bda.k7.solicitudes.repositories.TramoRepo;
 import lombok.AllArgsConstructor;
 
@@ -18,7 +18,7 @@ import lombok.AllArgsConstructor;
 public class TramoService {
     
     private final TramoRepo tramoRepo;
-    private final RutaService rutaService;
+    private final RutaRepo rutaRepo;
 
     //Mappers
     public TramoDTO toDto(Tramo tramo) {
@@ -53,7 +53,8 @@ public class TramoService {
         tramo.setFechaHoraInicio(dto.getFechaHoraInicio());
         tramo.setFechaHoraFin(dto.getFechaHoraFin());
         tramo.setCamionDominio(dto.getCamionDominio());
-        tramo.setRuta(rutaService.getRutaById(dto.getRutaId()));
+        tramo.setRuta(rutaRepo.findById(dto.getRutaId()).orElseThrow(()
+            -> new RuntimeException("Ruta no encontrada con id: " + dto.getRutaId())));
         return tramo;
     }
     //FIN Mappers
@@ -63,8 +64,9 @@ public class TramoService {
         return tramoRepo.save(tramo);
     }
 
-    public List<Tramo> getTramosByRutaOrdenados(Ruta ruta) {
-        return tramoRepo.findByRutaOrderByOrdenEnRutaAsc(ruta);
+    public List<TramoDTO> getTramosByRutaOrdenados(Ruta ruta) {
+        List<Tramo> tramos = tramoRepo.findByRutaOrderByOrdenEnRutaAsc(ruta);
+        return tramos.stream().map(this::toDto).toList();
     }
 
     public Tramo getTramoById(Integer tramoId) {
@@ -72,9 +74,26 @@ public class TramoService {
             -> new RuntimeException("Tramo no encontrado con id: " + tramoId));
     }
 
-    public TramoDTO actualizarEstado(Integer tramoId, TramoEstadoPatchDTO tramoEstadoPatchDTO) {
+    public TramoDTO actualizarEstado(Integer tramoId, TramoEstado nuevoEstado, String dominio) {
         Tramo tramo = getTramoById(tramoId);
-        tramo.setEstado(tramoEstadoPatchDTO.getNuevoEstado());
+        if (tramo == null) {
+            throw new RuntimeException("Tramo no encontrado con id: " + tramoId);
+        }
+        if (nuevoEstado == null) {
+            throw new IllegalArgumentException("El nuevo estado no puede ser nulo.");
+        }
+        if (dominio != null) {
+            if (nuevoEstado != TramoEstado.ASIGNADO && tramo.getEstado() != TramoEstado.ESTIMADO) {
+                throw new IllegalArgumentException("El dominio del camión solo puede ser seteado si el nuevoEstado es ASIGNADO y el actual es ESTIMADO.");
+            }
+            tramo.setCamionDominio(dominio);
+        }
+        if (nuevoEstado == TramoEstado.INICIADO) {
+            tramo.setFechaHoraInicio(java.time.LocalDateTime.now());
+        } else if (nuevoEstado == TramoEstado.FINALIZADO) {
+            tramo.setFechaHoraFin(java.time.LocalDateTime.now());
+        }
+        tramo.setEstado(nuevoEstado);
         Tramo tramoActualizado = save(tramo);
         return toDto(tramoActualizado);
     }

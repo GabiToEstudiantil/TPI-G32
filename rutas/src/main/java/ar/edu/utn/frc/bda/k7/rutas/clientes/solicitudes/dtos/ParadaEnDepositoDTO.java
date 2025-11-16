@@ -1,6 +1,7 @@
-package ar.edu.frc.utn.bda.k7.solicitudes.dtos;
+package ar.edu.utn.frc.bda.k7.rutas.clientes.solicitudes.dtos;
 
 import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,5 @@ public class ParadaEnDepositoDTO {
     private Double costoTotalEstadia;
     private Integer ordenEnRuta;
     private Integer depositoId;
-    
     private Integer rutaId;
 }

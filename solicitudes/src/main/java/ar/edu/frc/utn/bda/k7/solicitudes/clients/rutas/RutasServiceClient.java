@@ -3,6 +3,8 @@ package ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.CalcularDefRequestDTO;
+import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.CalcularDefResponseDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.EstimarCostoRequestDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.RutaCalculadaDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.UbicacionDTO;
@@ -40,6 +42,20 @@ public class RutasServiceClient {
                     .body(UbicacionDTO.class);
         } catch (Exception e) {
             System.err.println("Error al llamar a ms-rutas para obtener ubicacion: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public CalcularDefResponseDTO calcularCostoDefinitivo(CalcularDefRequestDTO request) {
+        try {
+            return restClient.post()
+                    .uri("/api/ruta/calcular-definitivo")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(request)
+                    .retrieve()
+                    .body(CalcularDefResponseDTO.class);
+        } catch (Exception e) {
+            System.err.println("Error al llamar a ms-rutas para calcular costo definitivo: " + e.getMessage());
             return null;
         }
     }

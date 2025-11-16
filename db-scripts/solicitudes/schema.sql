@@ -78,7 +78,7 @@ CREATE TABLE paradas_en_deposito (
     id SERIAL PRIMARY KEY,
     fecha_hora_llegada TIMESTAMP NOT NULL,
     fecha_hora_salida TIMESTAMP,
-    dias_estadia INT,
+    segundos_estadia BIGINT,
     costo_total_estadia DECIMAL(12, 2),
     orden_en_ruta INT NOT NULL,
     ruta_id INT NOT NULL,

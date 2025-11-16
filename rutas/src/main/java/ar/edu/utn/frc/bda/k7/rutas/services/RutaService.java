@@ -1,20 +1,25 @@
 package ar.edu.utn.frc.bda.k7.rutas.services;
 
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors; // Importar
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import ar.edu.utn.frc.bda.k7.rutas.clientes.geoapi.GeoApiClient;
 import ar.edu.utn.frc.bda.k7.rutas.clientes.geoapi.dtos.GeoapiDTO;
 import ar.edu.utn.frc.bda.k7.rutas.clientes.geoapi.dtos.RutaRequestDTO;
+import ar.edu.utn.frc.bda.k7.rutas.clientes.solicitudes.dtos.CalcularDefRequestDTO;
+import ar.edu.utn.frc.bda.k7.rutas.clientes.solicitudes.dtos.CalcularDefResponseDTO;
+import ar.edu.utn.frc.bda.k7.rutas.clientes.solicitudes.dtos.EstimarCostoRequestDTO;
+import ar.edu.utn.frc.bda.k7.rutas.clientes.solicitudes.dtos.ParadaEnDepositoDTO;
+import ar.edu.utn.frc.bda.k7.rutas.clientes.solicitudes.dtos.RutaCalculadaDTO;
+import ar.edu.utn.frc.bda.k7.rutas.clientes.solicitudes.dtos.TramoCalcularRutaDTO;
+import ar.edu.utn.frc.bda.k7.rutas.clientes.solicitudes.dtos.TramoDTO;
 import ar.edu.utn.frc.bda.k7.rutas.dtos.CamionDTO;
 import ar.edu.utn.frc.bda.k7.rutas.dtos.DepositoDTO;
-import ar.edu.utn.frc.bda.k7.rutas.dtos.EstimarCostoRequestDTO;
-import ar.edu.utn.frc.bda.k7.rutas.dtos.RutaCalculadaDTO;
-import ar.edu.utn.frc.bda.k7.rutas.dtos.TramoDTO; // Importar
 import ar.edu.utn.frc.bda.k7.rutas.dtos.UbicacionDTO;
 import ar.edu.utn.frc.bda.k7.rutas.entities.TarifaCombustible;
 import ar.edu.utn.frc.bda.k7.rutas.entities.TarifaVolumen;
@@ -60,7 +65,7 @@ public class RutaService {
 
         // 2. Calcular los tramos, asignando camiones en el proceso
         //    (Este método ahora devuelve la lista de DTOs directamente)
-        List<TramoDTO> tramos = this.calcularTramosConCamiones(
+        List<TramoCalcularRutaDTO> tramos = this.calcularTramosConCamiones(
             origen,
             destino,
             request.getPeso(),
@@ -74,7 +79,7 @@ public class RutaService {
         // 3. Calcular costos iterando sobre los tramos
         double costoTotal = 0.0; // Arrancamos a contar
 
-        for (TramoDTO tramo : tramos) {
+        for (TramoCalcularRutaDTO tramo : tramos) {
             double kilometrosTramo = tramo.getRutaDelTramo().getKilometros();
             double consumoCamionTramo = tramo.getCamionAsignado().getConsumoCombustiblePromedio();
             
@@ -101,9 +106,9 @@ public class RutaService {
 
 
     // --- LÓGICA DE CONSTRUCCIÓN DE RUTA ---
-    private List<TramoDTO> calcularTramosConCamiones(UbicacionDTO origen, UbicacionDTO destino, Double peso, Double volumen) {
+    private List<TramoCalcularRutaDTO> calcularTramosConCamiones(UbicacionDTO origen, UbicacionDTO destino, Double peso, Double volumen) {
         
-        List<TramoDTO> tramosCalculados = new ArrayList<>();
+        List<TramoCalcularRutaDTO> tramosCalculados = new ArrayList<>();
         
         List<DepositoDTO> depositosDisponibles = depositoService.getAllDepositos();
         List<CamionDTO> camionesDisponibles = camionService.findCamionesDisponibles(peso, volumen);
@@ -128,7 +133,7 @@ public class RutaService {
             camionEnDescanso = camionParaEsteTramo;
 
             if (rutaDirecta.getDuracionSegundos() <= maximoConduccionSegundos) {
-                TramoDTO tramoFinal = new TramoDTO();
+                TramoCalcularRutaDTO tramoFinal = new TramoCalcularRutaDTO();
                 tramoFinal.setRutaDelTramo(rutaDirecta);
                 tramoFinal.setCamionAsignado(camionParaEsteTramo);
                 tramoFinal.setDepositoParada(null);
@@ -155,7 +160,7 @@ public class RutaService {
                 throw new RuntimeException("No se pudo calcular la ruta al depósito seleccionado: " + direccionParada);
             }
 
-            TramoDTO tramoIntermedio = new TramoDTO();
+            TramoCalcularRutaDTO tramoIntermedio = new TramoCalcularRutaDTO();
             tramoIntermedio.setRutaDelTramo(rutaAlDepot);
             tramoIntermedio.setCamionAsignado(camionParaEsteTramo);
             tramoIntermedio.setDepositoParada(mejorParada);
@@ -233,5 +238,32 @@ public class RutaService {
         }
 
         return (mejorParadaOptima != null) ? mejorParadaOptima : mejorParadaSubOptima;
+    }
+
+    public CalcularDefResponseDTO calcularDefinitivo(CalcularDefRequestDTO request) {
+        TarifaCombustible tarifaComb = tarifaCombustibleService.getPrimeraTarifa();
+        List<TramoDTO> tramosConCostos = new ArrayList<>();
+        List<ParadaEnDepositoDTO> paradasConCostos = new ArrayList<>();
+        Double costoTotal = 0.0;
+        Long segundosTotales = 0L;
+        for (TramoDTO tramo : request.getTramos()) {
+            CamionDTO camion = camionService.getCamionByDominio(tramo.getCamionDominio());
+            Double costoTramo = camion.getConsumoCombustiblePromedio()*tarifaComb.getPrecioLitro()*tramo.getDistanciaKm();
+            tramo.setCostoReal(costoTramo);
+            tramosConCostos.add(tramo);
+            costoTotal += costoTramo;
+            Long segundosTramo = ChronoUnit.SECONDS.between(tramo.getFechaHoraInicio(), tramo.getFechaHoraFin());
+            segundosTotales += segundosTramo;
+        }
+        for (ParadaEnDepositoDTO parada : request.getParadasEnDeposito()) {
+            DepositoDTO deposito = depositoService.getDepositoById(parada.getDepositoId());
+            Long segundosEstadia = parada.getSegundosEstadia();
+            Double costoEstadia = (deposito.getCostoEstadiaDiario()/24)*(segundosEstadia/3600.0);
+            parada.setCostoTotalEstadia(costoEstadia);
+            paradasConCostos.add(parada);
+            costoTotal += costoEstadia;
+            segundosTotales += parada.getSegundosEstadia();
+        }
+        return new CalcularDefResponseDTO(costoTotal, tramosConCostos, segundosTotales, paradasConCostos);
     }
 }

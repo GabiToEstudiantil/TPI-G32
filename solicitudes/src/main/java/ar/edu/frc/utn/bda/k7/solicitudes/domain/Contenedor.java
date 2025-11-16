@@ -3,7 +3,6 @@ package ar.edu.frc.utn.bda.k7.solicitudes.domain;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import com.fasterxml.jackson.annotation.JacksonInject;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

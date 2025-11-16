@@ -27,8 +27,8 @@ public class ParadaEnDeposito {
     private LocalDateTime fechaHoraLlegada;
     @Column(name = "fecha_hora_salida")
     private LocalDateTime fechaHoraSalida;
-    @Column(name = "dias_estadia")
-    private Integer diasEstadia;
+    @Column(name = "segundos_estadia")
+    private Long segundosEstadia;
     @Column(name = "costo_total_estadia")
     private Double costoTotalEstadia;
     @Column(name = "orden_en_ruta")

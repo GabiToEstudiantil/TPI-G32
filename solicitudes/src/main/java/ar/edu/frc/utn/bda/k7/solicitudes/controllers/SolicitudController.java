@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController
-@RequestMapping("/api/solicitudes/")
+@RequestMapping("/api/solicitudes")
 @AllArgsConstructor
 public class SolicitudController {
 
@@ -93,6 +93,12 @@ public class SolicitudController {
 
     @PatchMapping("/{solicitudId}/tramos/{tramoId}/desasignar-camion")
     public ResponseEntity<TramoDTO> desasignarCamion (@RequestBody TramoEstadoPatchDTO tramoEstadoPatchDTO, @PathVariable Integer solicitudId, @PathVariable Integer tramoId) {
+        TramoDTO tramo = solicitudService.actualizarEstadoDeTramo(tramoEstadoPatchDTO, tramoId, solicitudId);
+        return ResponseEntity.ok(tramo);
+    }
+
+    @PatchMapping("/{solicitudId}/tramos/{tramoId}/actualizar-estado")
+    public ResponseEntity<TramoDTO> actualizarEstadoTramo (@RequestBody TramoEstadoPatchDTO tramoEstadoPatchDTO, @PathVariable Integer solicitudId, @PathVariable Integer tramoId) {
         TramoDTO tramo = solicitudService.actualizarEstadoDeTramo(tramoEstadoPatchDTO, tramoId, solicitudId);
         return ResponseEntity.ok(tramo);
     }

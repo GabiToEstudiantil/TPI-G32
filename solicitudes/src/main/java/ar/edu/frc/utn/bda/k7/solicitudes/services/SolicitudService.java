@@ -8,11 +8,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.RutasServiceClient;
+import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.CalcularDefRequestDTO;
+import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.CalcularDefResponseDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.CrearSolicitudRequestDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.EstimarCostoRequestDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.RutaCalculadaDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.TramoRutaDTO;
-import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.UbicacionDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.Contenedor;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.ContenedorEstado;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.ParadaEnDeposito;
@@ -22,10 +23,13 @@ import ar.edu.frc.utn.bda.k7.solicitudes.domain.SolicitudEstado;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.Tramo;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.TramoEstado;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.TramoTipo;
+import ar.edu.frc.utn.bda.k7.solicitudes.dtos.ParadaEnDepositoDTO;
+import ar.edu.frc.utn.bda.k7.solicitudes.dtos.RutaDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.SolicitudDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.TrackingDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.TramoDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.TramoEstadoPatchDTO;
+import ar.edu.frc.utn.bda.k7.solicitudes.repositories.RutaRepo;
 import ar.edu.frc.utn.bda.k7.solicitudes.repositories.SolicitudRepo;
 import lombok.AllArgsConstructor;
 
@@ -37,7 +41,7 @@ public class SolicitudService {
 
     private final ContenedorService contenedorService;
     private final RutasServiceClient rutasServiceClient;
-    private final RutaService rutaService;
+    private final RutaRepo rutaRepo;
     private final TramoService tramoService;
     private final ParadaEnDepositoService paradaEnDepositoService;
 
@@ -68,6 +72,26 @@ public class SolicitudService {
         return solicitud;
     }
     //FIN mappers
+
+        //Mappers
+    public RutaDTO toDto(Ruta ruta) {
+        RutaDTO dto = new RutaDTO();
+        dto.setId(ruta.getId());
+        dto.setCantidadTramos(ruta.getCantidadTramos());
+        dto.setCantidadDepositos(ruta.getCantidadDepositos());
+        dto.setSolicitud(this.toDto(ruta.getSolicitud()));
+        return dto;
+    }
+
+    public Ruta toRuta(RutaDTO dto) {
+        Ruta ruta = new Ruta();
+        ruta.setId(dto.getId());
+        ruta.setCantidadTramos(dto.getCantidadTramos());
+        ruta.setCantidadDepositos(dto.getCantidadDepositos());
+        ruta.setSolicitud(this.toSolicitud(dto.getSolicitud()));
+        return ruta;
+    }
+    //FIN Mappers
 
     public ArrayList<SolicitudDTO> obtenerTodas(){
         ArrayList<SolicitudDTO> solicitudDTOs = new ArrayList<>();
@@ -156,7 +180,7 @@ public class SolicitudService {
                 .filter(t -> t.getDepositoParada() != null)
                 .count());
         
-        Ruta rutaGuardada = rutaService.save(ruta);
+        Ruta rutaGuardada = rutaRepo.save(ruta);
 
         // 6. Recorremos los tramos recibidos y los guardamos
         int cant = 1;
@@ -217,19 +241,19 @@ public class SolicitudService {
 
     public TrackingDTO trackingSolicitud(Integer solicitudId) {
 
-        Ruta ruta = rutaService.getRutaBySolicitudId(solicitudId);
+        Ruta ruta = rutaRepo.findBySolicitudId(solicitudId);
 
-        List<Tramo> tramos = tramoService.getTramosByRutaOrdenados(ruta);
+        List<TramoDTO> tramos = tramoService.getTramosByRutaOrdenados(ruta);
         if (tramos.isEmpty()) {
             throw new RuntimeException("La ruta no tiene tramos...");
         }
 
         int tramosCompletados = 0;
-        Tramo tramoActual = null;
+        TramoDTO tramoActual = null;
         SolicitudEstado estado = SolicitudEstado.PENDIENTE_ASIGNACION;
 
         //Buscamos el estado actual revisando los estados de los tramos en orden
-        for (Tramo tramo : tramos) {
+        for (TramoDTO tramo : tramos) {
             if (tramo.getEstado() == TramoEstado.CANCELADO) {
                 estado = SolicitudEstado.CANCELADA;
                 tramoActual = tramo;
@@ -297,20 +321,61 @@ public class SolicitudService {
 
     @Transactional
     public TramoDTO actualizarEstadoDeTramo(TramoEstadoPatchDTO tramoEstadoPatchDTO, Integer tramoId, Integer solicitudId) {
-        
+        TramoEstado estadoNuevoTramo = tramoEstadoPatchDTO.getNuevoEstado();
+        String dominioCamion = tramoEstadoPatchDTO.getDominioCamion();
         Tramo tramo = tramoService.getTramoById(tramoId);
+        Solicitud solicitud = solicitudRepo.findById(solicitudId).orElse(null);
         if (tramo == null) { // Validamos si existe tramo
             throw new RuntimeException("Tramo no encontrado");
         }
         if (!tramo.getRuta().getSolicitud().getId().equals(solicitudId)) { // Validamos que el tramo pertenezca a la solicitud
             throw new SecurityException("El tramo no pertenece a la solicitud.");
         }
-        // Le decimos al tramo que se actualice
-        tramoService.actualizarEstado(tramoId, tramoEstadoPatchDTO);
-        // Buscamos ruta
-        Ruta ruta = rutaService.getRutaBySolicitudId(solicitudId);
-        // Si el tramo 
 
-        return tramoService.toDto(tramo);
+        Contenedor contenedor = solicitud.getContenedor();
+
+        if (estadoNuevoTramo == TramoEstado.INICIADO && (tramo.getTipo() == TramoTipo.DEPOSITO_DEPOSITO || tramo.getTipo() == TramoTipo.DEPOSITO_DESTINO)) {
+            ParadaEnDepositoDTO parada = paradaEnDepositoService.getParadaEnDepositoByRutaAndOrden(tramo.getRuta(), tramo.getOrdenEnRuta() - 1);
+
+            paradaEnDepositoService.guardarTiempoEstadia(parada);
+            contenedor.setEstado(ContenedorEstado.EN_TRANSITO);
+            contenedorService.save(contenedor);
+        }
+        if (estadoNuevoTramo == TramoEstado.FINALIZADO) {
+            if (tramo.getTipo() == TramoTipo.DEPOSITO_DEPOSITO || tramo.getTipo() == TramoTipo.ORIGEN_DEPOSITO) {
+                ParadaEnDepositoDTO parada = paradaEnDepositoService.getParadaEnDepositoByRutaAndOrden(tramo.getRuta(), tramo.getOrdenEnRuta());
+                parada.setFechaHoraLlegada(LocalDateTime.now());
+                paradaEnDepositoService.save(paradaEnDepositoService.toParada(parada));
+                contenedor.setEstado(ContenedorEstado.EN_DEPOSITO);
+                contenedorService.save(contenedor);
+            }
+            if (tramo.getTipo() == TramoTipo.DEPOSITO_DESTINO) {
+                CalcularDefResponseDTO defResponse = calcularDef(solicitud);
+                solicitud.setTiempoReal(defResponse.getSegundos()/3600 + " horas");
+                solicitud.setCostoFinal(defResponse.getCostoTotal());
+                for (ParadaEnDepositoDTO paradaDto : defResponse.getParadasEnDepositoConCosto()) {
+                    ParadaEnDeposito parada = paradaEnDepositoService.toParada(paradaDto);
+                    paradaEnDepositoService.save(parada);
+                }
+                for (TramoDTO tramoDto : defResponse.getTramosConCosto()) {
+                    Tramo tramoAActualizar = tramoService.toTramo(tramoDto);
+                    tramoService.save(tramoAActualizar);
+                }
+                contenedor.setEstado(ContenedorEstado.DISPONIBLE);
+                contenedorService.save(contenedor);
+            }
+        }
+        // Le decimos al tramo que se actualice
+        TramoDTO tramoActualizado = tramoService.actualizarEstado(tramoId, estadoNuevoTramo, dominioCamion);
+        return tramoActualizado;
+    }
+
+    public CalcularDefResponseDTO calcularDef(Solicitud solicitud) {
+        Ruta ruta = rutaRepo.findBySolicitudId(solicitud.getId());
+        List<TramoDTO> tramos = tramoService.getTramosByRutaOrdenados(ruta);
+        List<ParadaEnDepositoDTO> paradas = paradaEnDepositoService.getParadaEnDepositoByRuta(ruta);
+        CalcularDefRequestDTO peticion = new CalcularDefRequestDTO(tramos, paradas);
+        CalcularDefResponseDTO respuesta = rutasServiceClient.calcularCostoDefinitivo(peticion);
+        return respuesta;
     }
 }

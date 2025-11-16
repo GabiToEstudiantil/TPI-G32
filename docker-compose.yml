@@ -144,7 +144,7 @@ services:
     ports:
       - "8180:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db-users:5432/DB_SOLICITUDES
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-solicitudes:5432/DB_SOLICITUDES
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin123
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/tpi-backend

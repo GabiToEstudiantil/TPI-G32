@@ -1,4 +1,4 @@
-package ar.edu.utn.frc.bda.k7.rutas.dtos;
+package ar.edu.utn.frc.bda.k7.rutas.clientes.solicitudes.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
