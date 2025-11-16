@@ -6,6 +6,11 @@ services:
     image: quay.io/keycloak/keycloak:24.0.3
     container_name: keycloak
     command: start-dev
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/realms/tpi-backend || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     ports:
       - "8081:8080" # Keycloak expuesto en el puerto 8081 de tu PC
     environment:
@@ -92,12 +97,16 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-users:5432/DB_USERS
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin123
+      SPRING_DATASOURCE_DRIVER-CLASS-NAME: org.postgresql.Driver
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/tpi-backend
     networks:
       - backend
     depends_on:
       - db-users
       - keycloak
+      - int-keycloak
+    restart: on-failure
+    
 
 
   # --- 7. Microservicio int-geoapi ---
@@ -119,6 +128,7 @@ services:
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/tpi-backend
     networks:
       - backend
+    restart: on-failure
 
   # --- 9. api-gateway ---
   api-gateway:

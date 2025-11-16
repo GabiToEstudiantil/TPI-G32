@@ -1,7 +1,6 @@
 package ar.edu.frc.utn.bda.k7.solicitudes.domain;
 
 import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

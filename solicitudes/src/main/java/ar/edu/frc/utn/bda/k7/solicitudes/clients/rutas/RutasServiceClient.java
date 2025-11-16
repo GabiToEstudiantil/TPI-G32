@@ -2,7 +2,6 @@ package ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.EstimarCostoRequestDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.RutaCalculadaDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.UbicacionDTO;
