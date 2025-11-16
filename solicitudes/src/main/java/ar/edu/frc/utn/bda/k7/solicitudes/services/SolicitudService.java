@@ -115,7 +115,7 @@ public class SolicitudService {
     public void eliminar(Integer id){
         SolicitudDTO dto = buscarPorId(id);
         Object estado = dto.getContenedor().getEstado();
-        if (estado.equals("EN_TRANSITO") || estado.equals("EN_DEPOSITO")) {
+        if (estado == ContenedorEstado.EN_TRANSITO || estado == ContenedorEstado.EN_DEPOSITO) {
             throw new IllegalStateException("No se puede eliminar una solicitud en tránsito");
         }
         solicitudRepo.deleteById(id);

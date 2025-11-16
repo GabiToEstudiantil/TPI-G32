@@ -1,25 +1,19 @@
-version: '3.8'
-
 services:
   # --- 1. Servicio Keycloak (Autenticación) ---
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.3
     container_name: keycloak
     command: start-dev
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/realms/tpi-backend || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
     ports:
-      - "8081:8080" # Keycloak expuesto en el puerto 8081 de tu PC
+    - "8081:8080"
     environment:
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin123
+    - KEYCLOAK_ADMIN=admin
+    - KEYCLOAK_ADMIN_PASSWORD=admin123
     volumes:
-      - keycloak_data:/opt/keycloak/data
+    - keycloak_data:/opt/keycloak/data
     networks:
       - backend
+
 
   # --- 2. Base de Datos de Solicitudes ---
   db-solicitudes:
@@ -79,13 +73,23 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-rutas:5432/DB_RUTAS
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin123
-      
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/tpi-backend
+      # --- CONFIGURACIÓN DE SEGURIDAD CORREGIDA ---
+      # 1. ISSUER (Público): Para validar el 'iss' del token
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/tpi-backend
+      # 2. JWK-SET (Interno): Para que el contenedor pueda descargar las llaves
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/tpi-backend/protocol/openid-connect/certs
+      # ------------------------------------------------
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
     networks:
       - backend
     depends_on:
-      - db-rutas    # Se asegura que la BD de rutas inicie primero
-      - keycloak    # Se asegura que Keycloak inicie primero
+      - db-rutas
+      - keycloak
 
   # --- 6. Microservicio Users ---
   users-app:
@@ -98,7 +102,18 @@ services:
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin123
       SPRING_DATASOURCE_DRIVER-CLASS-NAME: org.postgresql.Driver
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/tpi-backend
+      # --- CONFIGURACIÓN DE SEGURIDAD CORREGIDA ---
+      # 1. ISSUER (Público): Para validar el 'iss' del token
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/tpi-backend
+      # 2. JWK-SET (Interno): Para que el contenedor pueda descargar las llaves
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/tpi-backend/protocol/openid-connect/certs
+      # ------------------------------------------------
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
     networks:
       - backend
     depends_on:
@@ -125,9 +140,16 @@ services:
     ports:
       - "9091:8080"
     environment:
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/tpi-backend
+      # --- CONFIGURACIÓN DE SEGURIDAD CORREGIDA ---
+      # 1. ISSUER (Público): Para validar el 'iss' del token
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/tpi-backend
+      # 2. JWK-SET (Interno): Para que el contenedor pueda descargar las llaves
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/tpi-backend/protocol/openid-connect/certs
+      # ------------------------------------------------
     networks:
       - backend
+    depends_on:
+      - keycloak
     restart: on-failure
 
   # --- 9. api-gateway ---
@@ -137,16 +159,15 @@ services:
     ports:
       - "9191:8080"
     environment:
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/tpi-backend
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/tpi-backend
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/tpi-backend/protocol/openid-connect/certs
     networks:
       - backend
     depends_on:
       - keycloak
+      - solicitudes-app
       - rutas-app
       - users-app
-      - int-geoapi
-      - int-keycloak
-
   # --- 10. Microservicio Solicitudes ---
   solicitudes-app:
     build: ./solicitudes
@@ -157,11 +178,23 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-solicitudes:5432/DB_SOLICITUDES
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin123
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/tpi-backend
+      # --- CONFIGURACIÓN DE SEGURIDAD CORREGIDA ---
+      # 1. ISSUER (Público): Para validar el 'iss' del token
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/tpi-backend
+      # 2. JWK-SET (Interno): Para que el contenedor pueda descargar las llaves
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/tpi-backend/protocol/openid-connect/certs
+      # ------------------------------------------------
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
     networks:
       - backend
     depends_on:
       - keycloak
+      - db-solicitudes
 
 # --- Volúmenes (Discos duros) ---
 volumes:

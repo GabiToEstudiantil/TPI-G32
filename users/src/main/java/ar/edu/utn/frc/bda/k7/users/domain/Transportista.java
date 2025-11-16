@@ -25,5 +25,4 @@ public class Transportista {
     private String dni;
     private String keycloak_id;
 
-
 }

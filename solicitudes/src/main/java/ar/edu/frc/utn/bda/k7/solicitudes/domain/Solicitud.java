@@ -7,7 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,7 +36,7 @@ public class Solicitud {
     @Column(name = "cliente_dni")
     private String clienteDni;
     
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "contenedor_id")
     private Contenedor contenedor;
 

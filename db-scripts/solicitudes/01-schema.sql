@@ -39,7 +39,7 @@ CREATE TABLE solicitudes (
     costo_final DECIMAL(12, 2),
     tiempo_real VARCHAR(100),
     cliente_dni VARCHAR(100) NOT NULL,
-    contenedor_id INT UNIQUE NOT NULL,
+    contenedor_id INT NOT NULL,
     
     FOREIGN KEY (contenedor_id) REFERENCES contenedores(id)
 );
@@ -50,7 +50,7 @@ CREATE TABLE rutas (
     cantidad_depositos INT,
     solicitud_id INT UNIQUE NOT NULL,
     
-    FOREIGN KEY (solicitud_id) REFERENCES solicitudes(id)
+    FOREIGN KEY (solicitud_id) REFERENCES solicitudes(id) ON DELETE CASCADE
 );
 
 CREATE TABLE tramos (
@@ -68,7 +68,7 @@ CREATE TABLE tramos (
     camion_dominio VARCHAR(20),
     orden_en_ruta INT NOT NULL,
     
-    FOREIGN KEY (ruta_id) REFERENCES rutas(id)
+    FOREIGN KEY (ruta_id) REFERENCES rutas(id) ON DELETE CASCADE
 );
 
 CREATE TABLE paradas_en_deposito (
@@ -81,5 +81,5 @@ CREATE TABLE paradas_en_deposito (
     ruta_id INT NOT NULL,
     deposito_id INT NOT NULL,
 
-    FOREIGN KEY (ruta_id) REFERENCES rutas(id)
+    FOREIGN KEY (ruta_id) REFERENCES rutas(id) ON DELETE CASCADE
 );
