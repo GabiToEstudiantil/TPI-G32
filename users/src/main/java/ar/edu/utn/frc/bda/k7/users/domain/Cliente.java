@@ -25,7 +25,7 @@ public class Cliente {
     private String apellido;
     private String email;
     private String telefono;
-    private Integer keycloak_id;
+    private String keycloak_id;
 }
 
 

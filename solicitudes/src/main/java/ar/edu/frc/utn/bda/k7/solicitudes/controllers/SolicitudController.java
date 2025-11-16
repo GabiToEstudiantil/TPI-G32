@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.CrearSolicitudRequestDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.SolicitudDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.TrackingDTO;
@@ -16,10 +15,8 @@ import ar.edu.frc.utn.bda.k7.solicitudes.dtos.TramoDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.TramoEstadoPatchDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.services.SolicitudService;
 import lombok.AllArgsConstructor;
-
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
 
 @RestController
 @RequestMapping("/api/solicitudes")

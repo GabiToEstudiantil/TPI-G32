@@ -3,10 +3,8 @@ package ar.edu.frc.utn.bda.k7.solicitudes.services;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.RutasServiceClient;
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.CalcularDefRequestDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.clients.rutas.dtos.CalcularDefResponseDTO;

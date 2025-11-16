@@ -26,17 +26,13 @@ public class Contenedor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    
-    @Column(name = "codigo_identificacion")
+
     private String codigoIdentificacion;
-    @Column(name = "peso")
     private Double peso;
-    @Column(name = "volumen")
     private Double volumen;
 
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(name = "estado")
     private ContenedorEstado estado;
 
     @Column(name = "cliente_dni")

@@ -11,14 +11,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ClienteDTO {
 
-    Integer keycloak_id;
     Integer dni;
     String nombre;
     String apellido;
     String email;
     String telefono;
+    String keycloak_id;
 
 }
 
-//podriamos hacer un dto para request y otro para response
+
 
