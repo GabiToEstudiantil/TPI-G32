@@ -1,4 +1,4 @@
-package ar.edu.utn.frc.bda.k7.users.dto;
+package ar.edu.utn.frc.bda.k7.users.dto.DTOSintegracion;
 
 import lombok.Data;
 
