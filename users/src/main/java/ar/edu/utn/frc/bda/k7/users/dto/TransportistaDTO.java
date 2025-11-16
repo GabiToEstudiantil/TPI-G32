@@ -11,12 +11,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TransportistaDTO {
 
-    Integer legajo;
+    String legajo;
     String nombre;
     String apellido;
-    Integer dni;
+    String dni;
     String email;
     String telefono;
-    Integer keycloak_id;
+    String keycloak_id;
     
 }

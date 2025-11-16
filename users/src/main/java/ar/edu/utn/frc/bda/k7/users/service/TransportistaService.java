@@ -47,7 +47,7 @@ public class TransportistaService {
         return transportistaDTO;
     }
 
-    public TransportistaDTO buscarPorLegajo(Integer legajo){
+    public TransportistaDTO buscarPorLegajo(String legajo){
         return toDto(transportistaRepository.findById(legajo).orElse(null));
     }
 
@@ -57,12 +57,12 @@ public class TransportistaService {
     }
 
     @Transactional
-    public TransportistaDTO actualizar(Integer legajo, TransportistaDTO dto) {
+    public TransportistaDTO actualizar(String legajo, TransportistaDTO dto) {
         Transportista existente = transportistaRepository.findById(legajo)
             .orElseThrow(() -> new RuntimeException("Transportista no encontrado con legajo: " + legajo));
         
         existente.setNombre(dto.getNombre());
-         existente.setApellido(dto.getApellido());
+        existente.setApellido(dto.getApellido());
         existente.setEmail(dto.getEmail());
         existente.setTelefono(dto.getTelefono());
         existente.setKeycloak_id(dto.getKeycloak_id());
@@ -71,8 +71,3 @@ public class TransportistaService {
         return toDto(actualizado);
     }
 }
-
-
-
-
-   

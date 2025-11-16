@@ -84,7 +84,7 @@
 //         Cliente cliente = toCliente(creationDto);
         
 //         // 4. Asignar el ID DE KEYCLOAK antes de guardar en la BD local
-//         cliente.setKeycloak_id(keycloakId); 
+//         cliente.setKeycloak_id(keycloakId);
 
 //         // 5. Guardar y retornar
 //         Cliente clienteGuardado = clienteRepository.save(cliente);
@@ -98,7 +98,7 @@
 //         CreateUserRequestDTO request = new CreateUserRequestDTO();
         
 //         // Usamos el DNI como username, que es el campo que usas en Keycloak
-//         request.setUsername(dto.getDni().toString()); 
+//         request.setUsername(dto.getDni().toString());
 //         request.setEmail(dto.getEmail());
 //         request.setPassword(dto.getPassword());
 //         request.setRole("CLIENTE"); // Rol que debe estar configurado en Keycloak
@@ -107,19 +107,19 @@
 //         return request;
 //     }
 
-// } 
+// }
 package ar.edu.utn.frc.bda.k7.users.service;
 
 import java.util.ArrayList;
-import java.util.stream.Collectors; 
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ar.edu.utn.frc.bda.k7.users.repository.ClientRepository;
 import lombok.AllArgsConstructor;
 import ar.edu.utn.frc.bda.k7.users.clients.KeycloakServiceClient;
-import ar.edu.utn.frc.bda.k7.users.dto.ClienteCreacionRequestDTO; 
-import ar.edu.utn.frc.bda.k7.users.dto.CreateUserRequestDTO; 
+import ar.edu.utn.frc.bda.k7.users.dto.ClienteCreacionRequestDTO;
+import ar.edu.utn.frc.bda.k7.users.dto.CreateUserRequestDTO;
 
 import ar.edu.utn.frc.bda.k7.users.domain.Cliente;
 import ar.edu.utn.frc.bda.k7.users.dto.ClienteDTO;
@@ -172,13 +172,13 @@ public class ClienteService {
         return clienteDTO;
     }
 
-    public ClienteDTO buscarPorDni(Integer dni){
+    public ClienteDTO buscarPorDni(String dni){
         Cliente cliente = clienteRepository.findById(dni).orElse(null);
         return cliente != null ? toDto(cliente) : null;
     }
 
     @Transactional
-    public ClienteDTO actualizar(Integer dni, ClienteDTO dto) {
+    public ClienteDTO actualizar(String dni, ClienteDTO dto) {
         Cliente existente = clienteRepository.findById(dni)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado con DNI: " + dni));
 
@@ -186,7 +186,7 @@ public class ClienteService {
         existente.setApellido(dto.getApellido());
         existente.setEmail(dto.getEmail());
         existente.setTelefono(dto.getTelefono());
-        existente.setKeycloak_id(dto.getKeycloak_id()); 
+        existente.setKeycloak_id(dto.getKeycloak_id());
 
         Cliente actualizado = clienteRepository.save(existente);
         return toDto(actualizado);
@@ -207,7 +207,7 @@ public class ClienteService {
         Cliente cliente = toCliente(creationDto);
         
         // 4. Asignar el ID DE KEYCLOAK (UUID) a la Entidad local
-        cliente.setKeycloak_id(keycloakId); 
+        cliente.setKeycloak_id(keycloakId);
 
         // 5. Guardar la entidad en la base de datos local
         Cliente clienteGuardado = clienteRepository.save(cliente);
@@ -219,10 +219,10 @@ public class ClienteService {
     private CreateUserRequestDTO createKeycloakRequest(ClienteCreacionRequestDTO dto) {
         CreateUserRequestDTO request = new CreateUserRequestDTO();
         
-        request.setUsername(dto.getDni().toString()); 
+        request.setUsername(dto.getDni());
         request.setEmail(dto.getEmail());
-        request.setPassword(dto.getPassword()); 
-        request.setRole("CLIENTE"); 
+        request.setPassword(dto.getPassword());
+        request.setRole("CLIENTE");
         
         return request;
     }

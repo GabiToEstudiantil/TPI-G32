@@ -23,7 +23,7 @@ public class TransportistaController {
     private TransportistaService transportistaService;
 
     @GetMapping("/{legajo}")
-    public ResponseEntity<TransportistaDTO> obtenerPorLegajo(@PathVariable Integer legajo) {
+    public ResponseEntity<TransportistaDTO> obtenerPorLegajo(@PathVariable String legajo) {
         TransportistaDTO dto = transportistaService.buscarPorLegajo(legajo);
         if (dto == null) {
         return ResponseEntity.notFound().build();
@@ -43,7 +43,7 @@ public class TransportistaController {
     }
 
     @PutMapping("/{legajo}")
-    public ResponseEntity<?> actualizarTransportista(@PathVariable Integer legajo, @RequestBody TransportistaDTO transportistaDTO){
+    public ResponseEntity<?> actualizarTransportista(@PathVariable String legajo, @RequestBody TransportistaDTO transportistaDTO){
         try {
             TransportistaDTO actualizado = transportistaService.actualizar(legajo, transportistaDTO);
             return ResponseEntity.ok(actualizado);

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ClienteDTO {
 
-    Integer dni;
+    String dni;
     String nombre;
     String apellido;
     String email;

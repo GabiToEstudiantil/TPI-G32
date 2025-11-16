@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import ar.edu.utn.frc.bda.k7.users.domain.Transportista;
 
-public interface TransportistaRepository extends JpaRepository <Transportista, Integer>{
+public interface TransportistaRepository extends JpaRepository <Transportista, String>{
 
     //comentario como hizo gabi
 }

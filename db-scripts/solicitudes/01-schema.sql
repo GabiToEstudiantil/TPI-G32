@@ -21,9 +21,6 @@ CREATE TYPE contenedor_estado AS ENUM (
     'EN_TRANSITO',
     'EN_DEPOSITO'
 );
--- 2. CREAR LAS TABLAS
--- Nombres de tabla en plural y snake_case
--- Nombres de columna en snake_case
 
 CREATE TABLE contenedores (
     id SERIAL PRIMARY KEY,
@@ -31,7 +28,7 @@ CREATE TABLE contenedores (
     peso DECIMAL(10, 2) NOT NULL,
     volumen DECIMAL(10, 2) NOT NULL,
     estado contenedor_estado DEFAULT 'DISPONIBLE',
-    cliente_dni VARCHAR(100) NOT NULL -- FK Lógica a db_usuarios.Cliente
+    cliente_dni VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE solicitudes (
@@ -41,7 +38,7 @@ CREATE TABLE solicitudes (
     tiempo_estimado VARCHAR(100),
     costo_final DECIMAL(12, 2),
     tiempo_real VARCHAR(100),
-    cliente_dni VARCHAR(100) NOT NULL, -- FK Lógica a db_usuarios.Cliente
+    cliente_dni VARCHAR(100) NOT NULL,
     contenedor_id INT UNIQUE NOT NULL,
     
     FOREIGN KEY (contenedor_id) REFERENCES contenedores(id)
@@ -58,8 +55,8 @@ CREATE TABLE rutas (
 
 CREATE TABLE tramos (
     id SERIAL PRIMARY KEY,
-    origen_id INT NOT NULL, -- FK Lógica a db_flota.Ubicacion
-    destino_id INT NOT NULL, -- FK Lógica a db_flota.Ubicacion
+    origen_id INT NOT NULL,
+    destino_id INT NOT NULL,
     tipo tramo_tipo NOT NULL,
     estado tramo_estado NOT NULL DEFAULT 'ESTIMADO',
     distancia_km DECIMAL(10, 2),
@@ -68,7 +65,7 @@ CREATE TABLE tramos (
     fecha_hora_inicio TIMESTAMP,
     fecha_hora_fin TIMESTAMP,
     ruta_id INT NOT NULL,
-    camion_dominio VARCHAR(20), -- FK Lógica a db_flota.Camion
+    camion_dominio VARCHAR(20),
     orden_en_ruta INT NOT NULL,
     
     FOREIGN KEY (ruta_id) REFERENCES rutas(id)
@@ -76,13 +73,13 @@ CREATE TABLE tramos (
 
 CREATE TABLE paradas_en_deposito (
     id SERIAL PRIMARY KEY,
-    fecha_hora_llegada TIMESTAMP NOT NULL,
+    fecha_hora_llegada TIMESTAMP,
     fecha_hora_salida TIMESTAMP,
     segundos_estadia BIGINT,
     costo_total_estadia DECIMAL(12, 2),
     orden_en_ruta INT NOT NULL,
     ruta_id INT NOT NULL,
-    deposito_id INT NOT NULL, -- FK Lógica a db_flota.Deposito
+    deposito_id INT NOT NULL,
 
     FOREIGN KEY (ruta_id) REFERENCES rutas(id)
 );

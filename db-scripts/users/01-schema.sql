@@ -1,4 +1,3 @@
--- 1. CREAR LAS TABLAS
 
 CREATE TABLE clientes (
     dni VARCHAR(100) PRIMARY KEY,
