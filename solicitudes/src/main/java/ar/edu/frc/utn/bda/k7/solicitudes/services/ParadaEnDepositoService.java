@@ -48,4 +48,16 @@ public class ParadaEnDepositoService {
     public ParadaEnDeposito save(ParadaEnDeposito parada) {
         return paradaRepo.save(parada);
     }
+
+    public ParadaEnDeposito getParadaById(Integer paradaId) {
+        return paradaRepo.findById(paradaId)
+                .orElseThrow(() -> new RuntimeException("Parada en depósito no encontrada con ID: " + paradaId));
+    }
+
+    public ParadaEnDepositoDTO registrarLlegada(Integer paradaId) {
+        ParadaEnDeposito parada = getParadaById(paradaId);
+        parada.setFechaHoraLlegada(java.time.LocalDateTime.now());
+        ParadaEnDeposito paradaActualizada = save(parada);
+        return toDto(paradaActualizada);
+    }
 }

@@ -7,7 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.Ruta;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.Tramo;
+import ar.edu.frc.utn.bda.k7.solicitudes.domain.TramoEstado;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.TramoDTO;
+import ar.edu.frc.utn.bda.k7.solicitudes.dtos.TramoEstadoPatchDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.repositories.TramoRepo;
 import lombok.AllArgsConstructor;
 
@@ -63,6 +65,18 @@ public class TramoService {
 
     public List<Tramo> getTramosByRutaOrdenados(Ruta ruta) {
         return tramoRepo.findByRutaOrderByOrdenEnRutaAsc(ruta);
+    }
+
+    public Tramo getTramoById(Integer tramoId) {
+        return tramoRepo.findById(tramoId).orElseThrow(()
+            -> new RuntimeException("Tramo no encontrado con id: " + tramoId));
+    }
+
+    public TramoDTO actualizarEstado(Integer tramoId, TramoEstadoPatchDTO tramoEstadoPatchDTO) {
+        Tramo tramo = getTramoById(tramoId);
+        tramo.setEstado(tramoEstadoPatchDTO.getNuevoEstado());
+        Tramo tramoActualizado = save(tramo);
+        return toDto(tramoActualizado);
     }
 
 }

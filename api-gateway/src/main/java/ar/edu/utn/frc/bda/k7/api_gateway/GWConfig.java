@@ -11,20 +11,41 @@ public class GWConfig {
     
     @Bean
     public RouteLocator configPaths(RouteLocatorBuilder builder,
-        @Value ("http://localhost:") String baseHost, //Esta declaracion de cosas me dijo copylot de meterlas en el .properties
-        @Value ("/api/ruta/**") String uriRuta,       //Pero nose, dsp lo veremos :]
-        @Value ("/api/users/**") String uriUsuarios,
-        @Value ("/api/solicitudes/**") String uriSolicitudes, @Value ("/api/contenedores/**") String uriContenedores,
-        @Value ("/api/maps/**") String uriMaps,
-        @Value ("/api/auth/**") String uriAuth
-        ) {
+            // URLs
+            @Value("${service.url.rutas}") String rutasUrl,
+            @Value("${service.url.users}") String usersUrl,
+            @Value("${service.url.solicitudes}") String solicitudesUrl,
+            @Value("${service.url.geoapi}") String geoapiUrl,
+            @Value("${service.url.keycloak}") String keycloakUrl,
+
+            // Paths
+            @Value("${service.path.rutas}") String rutasPath,
+            @Value("${service.path.users}") String usersPath,
+            @Value("${service.path.solicitudes}") String solicitudesPath,
+            @Value("${service.path.contenedores}") String contenedoresPath,
+            @Value("${service.path.geoapi}") String geoapiPath,
+            @Value("${service.path.keycloak}") String keycloakPath
+            ) {
+        
         return builder.routes()
-        .route(r -> r.path(uriRuta).uri(baseHost + "8181"))
-        .route(r -> r.path(uriUsuarios).uri(baseHost + "8080"))
-        .route(r -> r.path(uriSolicitudes).uri(baseHost + "8180"))
-        .route(r -> r.path(uriContenedores).uri(baseHost + "8180"))
-        .route(r -> r.path(uriMaps).uri(baseHost + "9090"))
-        .route(r -> r.path(uriAuth).uri(baseHost + "9091"))
-        .build();
+            .route("rutas", r -> r.path(rutasPath)
+                    .uri(rutasUrl))
+            
+            .route("users", r -> r.path(usersPath)
+                    .uri(usersUrl))
+            
+            .route("solicitudes", r -> r.path(solicitudesPath)
+                    .uri(solicitudesUrl))
+            
+            .route("contenedores", r -> r.path(contenedoresPath)
+                    .uri(solicitudesUrl)) // <-- Es la misma uri que solicitudes
+            
+            .route("geoapi", r -> r.path(geoapiPath)
+                    .uri(geoapiUrl))
+            
+            .route("keycloak", r -> r.path(keycloakPath)
+                    .uri(keycloakUrl))
+            
+            .build();
     }
 }

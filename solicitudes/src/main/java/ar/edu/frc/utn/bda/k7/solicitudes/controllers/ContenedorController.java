@@ -14,7 +14,6 @@ import ar.edu.frc.utn.bda.k7.solicitudes.services.ContenedorService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 

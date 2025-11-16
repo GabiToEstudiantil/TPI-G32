@@ -24,6 +24,8 @@ import ar.edu.frc.utn.bda.k7.solicitudes.domain.TramoEstado;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.TramoTipo;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.SolicitudDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.dtos.TrackingDTO;
+import ar.edu.frc.utn.bda.k7.solicitudes.dtos.TramoDTO;
+import ar.edu.frc.utn.bda.k7.solicitudes.dtos.TramoEstadoPatchDTO;
 import ar.edu.frc.utn.bda.k7.solicitudes.repositories.SolicitudRepo;
 import lombok.AllArgsConstructor;
 
@@ -224,17 +226,17 @@ public class SolicitudService {
 
         int tramosCompletados = 0;
         Tramo tramoActual = null;
-        SolicitudEstado estadoGeneral = SolicitudEstado.PENDIENTE_ASIGNACION;
+        SolicitudEstado estado = SolicitudEstado.PENDIENTE_ASIGNACION;
 
         //Buscamos el estado actual revisando los estados de los tramos en orden
         for (Tramo tramo : tramos) {
             if (tramo.getEstado() == TramoEstado.CANCELADO) {
-                estadoGeneral = SolicitudEstado.CANCELADA;
+                estado = SolicitudEstado.CANCELADA;
                 tramoActual = tramo;
                 break; //Si está cancelado, no importa el resto
             }
             if (tramo.getEstado() == TramoEstado.INICIADO) {
-                estadoGeneral = SolicitudEstado.EN_TRANSITO;
+                estado = SolicitudEstado.EN_TRANSITO;
                 tramoActual = tramo;
                 break; //Si está iniciado, no importa el resto
             }
@@ -244,13 +246,13 @@ public class SolicitudService {
             //Si no está en ninguno de los otros 3 estados, puede ser ASIGNADO o ESTIMADO
             if (tramoActual == null && (tramo.getEstado() == TramoEstado.ASIGNADO || tramo.getEstado() == TramoEstado.ESTIMADO)) {
                 tramoActual = tramo;
-                estadoGeneral = (tramo.getEstado() == TramoEstado.ASIGNADO) ? SolicitudEstado.LISTA_PARA_INICIAR : SolicitudEstado.PENDIENTE_ASIGNACION;
+                estado = (tramo.getEstado() == TramoEstado.ASIGNADO) ? SolicitudEstado.LISTA_PARA_INICIAR : SolicitudEstado.PENDIENTE_ASIGNACION;
                 break; //Si encontramos el primer tramo no iniciado, lo tomamos como actual
             }
         }
 
         if (tramosCompletados == tramos.size()) {
-            estadoGeneral = SolicitudEstado.FINALIZADA;
+            estado = SolicitudEstado.FINALIZADA;
             tramoActual = tramos.get(tramos.size() - 1); //El último tramo
         }
 
@@ -264,19 +266,19 @@ public class SolicitudService {
             String origen = rutasServiceClient.getUbicacionById(tramoActual.getOrigenId()).getDireccionTextual();
             String destino = rutasServiceClient.getUbicacionById(tramoActual.getDestinoId()).getDireccionTextual();
 
-            if (estadoGeneral == SolicitudEstado.EN_TRANSITO) {
+            if (estado == SolicitudEstado.EN_TRANSITO) {
                 desc = "En viaje de " + origen + " a " + destino;
             }
-            else if (estadoGeneral == SolicitudEstado.LISTA_PARA_INICIAR) {
+            else if (estado == SolicitudEstado.LISTA_PARA_INICIAR) {
                 desc = "Listo para iniciar viaje desde " + origen + " hacia " + destino;
             }
-            else if (estadoGeneral == SolicitudEstado.PENDIENTE_ASIGNACION) {
+            else if (estado == SolicitudEstado.PENDIENTE_ASIGNACION) {
                 desc = "Todavia no lo asignamos, pero está en " + origen;
             }
-            else if (estadoGeneral == SolicitudEstado.FINALIZADA) {
+            else if (estado == SolicitudEstado.FINALIZADA) {
                 desc = "Ya llegó a " + destino;
             }
-            else if (estadoGeneral == SolicitudEstado.CANCELADA) {
+            else if (estado == SolicitudEstado.CANCELADA) {
                 desc = "Ya la cancelaste, está en " + origen;
             }
 
@@ -285,12 +287,30 @@ public class SolicitudService {
         }
         return new TrackingDTO(
             solicitudId,
-            estadoGeneral,
+            estado,
             desc,
             tramoActual.getCamionDominio(),
             tramosCompletados,
             tramos.size()
         );
+    }
 
+    @Transactional
+    public TramoDTO actualizarEstadoDeTramo(TramoEstadoPatchDTO tramoEstadoPatchDTO, Integer tramoId, Integer solicitudId) {
+        
+        Tramo tramo = tramoService.getTramoById(tramoId);
+        if (tramo == null) { // Validamos si existe tramo
+            throw new RuntimeException("Tramo no encontrado");
+        }
+        if (!tramo.getRuta().getSolicitud().getId().equals(solicitudId)) { // Validamos que el tramo pertenezca a la solicitud
+            throw new SecurityException("El tramo no pertenece a la solicitud.");
+        }
+        // Le decimos al tramo que se actualice
+        tramoService.actualizarEstado(tramoId, tramoEstadoPatchDTO);
+        // Buscamos ruta
+        Ruta ruta = rutaService.getRutaBySolicitudId(solicitudId);
+        // Si el tramo 
+
+        return tramoService.toDto(tramo);
     }
 }
