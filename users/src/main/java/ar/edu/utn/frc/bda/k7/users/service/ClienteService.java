@@ -111,15 +111,19 @@
 package ar.edu.utn.frc.bda.k7.users.service;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ar.edu.utn.frc.bda.k7.users.repository.ClientRepository;
 import lombok.AllArgsConstructor;
 import ar.edu.utn.frc.bda.k7.users.clients.KeycloakServiceClient;
-import ar.edu.utn.frc.bda.k7.users.dto.DTOSintegracion.ClienteCreacionRequestDTO;
-import ar.edu.utn.frc.bda.k7.users.dto.DTOSintegracion.CreateUserRequestDTO;
+import ar.edu.utn.frc.bda.k7.users.dto.ClienteCreacionRequestDTO;
+import ar.edu.utn.frc.bda.k7.users.dto.CreateUserRequestDTO;
+
 import ar.edu.utn.frc.bda.k7.users.domain.Cliente;
 import ar.edu.utn.frc.bda.k7.users.dto.ClienteDTO;
+
 
 @Service
 @AllArgsConstructor
@@ -196,6 +200,7 @@ public class ClienteService {
         CreateUserRequestDTO keycloakRequest = createKeycloakRequest(creationDto);
 
         // 2. LLAMADA AL MICROSERVICIO KEYCLOAK. Obtiene el ID generado (UUID).
+        // Si hay un error (ej. DNI/usuario ya existe), keycloakServiceClient lanzará una RuntimeException.
         String keycloakId = keycloakServiceClient.crearUsuario(keycloakRequest);
 
         // 3. Mapear DTO de Request a la Entidad Cliente
