@@ -331,9 +331,11 @@ public class SolicitudService {
         }
 
         Contenedor contenedor = solicitud.getContenedor();
+        // Le decimos al tramo que se actualice
+        TramoDTO tramoActualizado = tramoService.actualizarEstado(tramoId, estadoNuevoTramo, dominioCamion);
 
         if (estadoNuevoTramo == TramoEstado.INICIADO && (tramo.getTipo() == TramoTipo.DEPOSITO_DEPOSITO || tramo.getTipo() == TramoTipo.DEPOSITO_DESTINO)) {
-            ParadaEnDepositoDTO parada = paradaEnDepositoService.getParadaEnDepositoByRutaAndOrden(tramo.getRuta(), tramo.getOrdenEnRuta() - 1);
+            ParadaEnDepositoDTO parada = paradaEnDepositoService.getParadaEnDepositoByRutaAndOrden(tramo.getRuta().getId(), tramo.getOrdenEnRuta() - 1);
 
             paradaEnDepositoService.guardarTiempoEstadia(parada);
             contenedor.setEstado(ContenedorEstado.EN_TRANSITO);
@@ -341,30 +343,37 @@ public class SolicitudService {
         }
         if (estadoNuevoTramo == TramoEstado.FINALIZADO) {
             if (tramo.getTipo() == TramoTipo.DEPOSITO_DEPOSITO || tramo.getTipo() == TramoTipo.ORIGEN_DEPOSITO) {
-                ParadaEnDepositoDTO parada = paradaEnDepositoService.getParadaEnDepositoByRutaAndOrden(tramo.getRuta(), tramo.getOrdenEnRuta());
+                ParadaEnDepositoDTO parada = paradaEnDepositoService.getParadaEnDepositoByRutaAndOrden(tramo.getRuta().getId(), tramo.getOrdenEnRuta());
                 parada.setFechaHoraLlegada(LocalDateTime.now());
                 paradaEnDepositoService.save(paradaEnDepositoService.toParada(parada));
                 contenedor.setEstado(ContenedorEstado.EN_DEPOSITO);
                 contenedorService.save(contenedor);
             }
-            if (tramo.getTipo() == TramoTipo.DEPOSITO_DESTINO) {
+            if (tramo.getTipo() == TramoTipo.DEPOSITO_DESTINO || tramo.getTipo() == TramoTipo.ORIGEN_DESTINO) {
                 CalcularDefResponseDTO defResponse = calcularDef(solicitud);
                 solicitud.setTiempoReal(defResponse.getSegundos()/3600 + " horas");
                 solicitud.setCostoFinal(defResponse.getCostoTotal());
+                solicitudRepo.save(solicitud);
                 for (ParadaEnDepositoDTO paradaDto : defResponse.getParadasEnDepositoConCosto()) {
-                    ParadaEnDeposito parada = paradaEnDepositoService.toParada(paradaDto);
-                    paradaEnDepositoService.save(parada);
+                    ParadaEnDeposito paradaExistente = paradaEnDepositoService.getParadaById(paradaDto.getId());
+                    if (paradaExistente != null) {
+                        paradaExistente.setCostoTotalEstadia(paradaDto.getCostoTotalEstadia());
+                        // NO tocar orden_en_ruta, ruta_id, ni otros campos clave
+                        paradaEnDepositoService.save(paradaExistente);
+                    }
                 }
                 for (TramoDTO tramoDto : defResponse.getTramosConCosto()) {
-                    Tramo tramoAActualizar = tramoService.toTramo(tramoDto);
-                    tramoService.save(tramoAActualizar);
+                    Tramo tramoExistente = tramoService.getTramoById(tramoDto.getId());
+                    if (tramoExistente != null) {
+                        tramoExistente.setCostoReal(tramoDto.getCostoReal());
+                        // NO tocar orden_en_ruta, ruta_id, ni otros campos clave
+                        tramoService.save(tramoExistente);
+                    }
                 }
                 contenedor.setEstado(ContenedorEstado.DISPONIBLE);
                 contenedorService.save(contenedor);
             }
         }
-        // Le decimos al tramo que se actualice
-        TramoDTO tramoActualizado = tramoService.actualizarEstado(tramoId, estadoNuevoTramo, dominioCamion);
         return tramoActualizado;
     }
 

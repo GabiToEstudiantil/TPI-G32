@@ -29,17 +29,38 @@ public class DepositoController {
     }
 
     @PostMapping
-    public ResponseEntity<DepositoDTO> postDeposito(@RequestBody DepositoDTO dto) {
-        if (dto.getNombre() == null || dto.getCostoEstadiaDiario() == null ||
-            (dto.getUbicacion().getDireccionTextual() == null &&
-            dto.getUbicacion().getLatitud() == null && dto.getUbicacion().getLongitud() == null)) {
-                return ResponseEntity.badRequest().build();
+    public ResponseEntity<?> postDeposito(@RequestBody DepositoDTO dto) {
+        try {
+            // Validaciones básicas
+            if (dto.getNombre() == null || dto.getCostoEstadiaDiario() == null) {
+                return ResponseEntity.badRequest().body("Nombre y costo son obligatorios");
+            }
+            
+            if (dto.getUbicacion() == null) {
+                return ResponseEntity.badRequest().body("Ubicación es obligatoria");
+            }
+            
+            if (dto.getUbicacion().getCiudad() == null || dto.getUbicacion().getCiudad().getId() == null) {
+                return ResponseEntity.badRequest().body("Ciudad es obligatoria");
+            }
+            
+            // Validar que tenga al menos dirección O coordenadas
+            if (dto.getUbicacion().getDireccionTextual() == null &&
+                (dto.getUbicacion().getLatitud() == null || dto.getUbicacion().getLongitud() == null)) {
+                return ResponseEntity.badRequest().body("Debe proporcionar dirección o coordenadas");
+            }
+            
+            // NO validar si existe (en POST siempre es nuevo)
+            // El ID se genera automáticamente
+            
+            DepositoDTO entity = depositoService.saveDeposito(dto);
+            return ResponseEntity.status(201).body(entity);
+            
+        } catch (Exception e) {
+            System.err.println("Error al crear depósito: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
-        if (depositoService.getDepositoById(dto.getId()) != null) {
-            return ResponseEntity.status(409).build();
-        }
-        DepositoDTO entity = depositoService.saveDeposito(dto);
-        return ResponseEntity.status(201).body(entity);
     }
 
     @PutMapping("/{depositoId}")

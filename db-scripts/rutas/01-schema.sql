@@ -25,7 +25,7 @@ CREATE TABLE camiones (
     transportista_legajo VARCHAR(100),
     capacidad_peso DECIMAL(10, 2) NOT NULL,
     capacidad_volumen DECIMAL(10, 2) NOT NULL,
-    disponibilidad BOOLEAN DEFAULT true,
+    disponible BOOLEAN DEFAULT true,
     consumo_combustible_promedio DECIMAL(5, 2) NOT NULL
 );
 

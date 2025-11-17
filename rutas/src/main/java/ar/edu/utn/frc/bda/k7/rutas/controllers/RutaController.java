@@ -46,11 +46,21 @@ public class RutaController {
     @PostMapping("/calcular-definitivo")
     public ResponseEntity<CalcularDefResponseDTO> calcularDefinitivo(@RequestBody CalcularDefRequestDTO request) {
         try {
+            System.out.println("=== RECIBIDO REQUEST calcular-definitivo ===");
+            System.out.println("Tramos: " + (request.getTramos() != null ? request.getTramos().size() : "null"));
+            System.out.println("Paradas: " + (request.getParadasEnDeposito() != null ? request.getParadasEnDeposito().size() : "null"));
+            
             CalcularDefResponseDTO dto = rutaService.calcularDefinitivo(request);
+            
+            System.out.println("=== RESPUESTA calcular-definitivo ===");
+            System.out.println("Costo total: " + dto.getCostoTotal());
+            System.out.println("Segundos: " + dto.getSegundos());
+            
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
-            System.err.println("Error al calcular definitivo: " + e.getMessage());
-            return ResponseEntity.badRequest().build();
+            System.err.println("❌ Error al calcular definitivo en RutaController:");
+            e.printStackTrace();
+            return ResponseEntity.status(500).build(); // ← DEVOLVER 500 en lugar de 400
         }
     }
     

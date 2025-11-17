@@ -69,27 +69,40 @@ public class TarifaVolumenController {
                 return ResponseEntity.badRequest().build();
         }
 
-        if (tarifaVolumenService.findTarifaById(Integer.parseInt(tarifaId)) == null) {
+        Integer id = Integer.parseInt(tarifaId);
+        
+        if (tarifaVolumenService.findTarifaById(id) == null) {
             return ResponseEntity.notFound().build();
         }
+        
+        // ✅ ASIGNAR EL ID AL DTO ANTES DE VALIDAR
+        dto.setId(id);
+        
         ArrayList<TarifaVolumenDTO> existingTarifas = tarifaVolumenService.getAllTarifasVolumen();
 
         boolean seCruza = existingTarifas.stream().anyMatch(t ->
-            ((dto.getVolumenMin().compareTo(t.getVolumenMin()) >= 0 &&
-            dto.getVolumenMin().compareTo(t.getVolumenMax()) <= 0)
-            ||
-            (dto.getVolumenMax().compareTo(t.getVolumenMin()) >= 0 &&
-            dto.getVolumenMax().compareTo(t.getVolumenMax()) <= 0)
-            ||
-            (dto.getVolumenMin().compareTo(t.getVolumenMin()) <= 0 &&
-            dto.getVolumenMax().compareTo(t.getVolumenMax()) >= 0)
-            && !t.getId().equals(Integer.parseInt(tarifaId))) // Sin contar la tarifa que estamos actualizando
+            // Solo validar si NO es la misma tarifa que estamos actualizando
+            !t.getId().equals(id) && (
+                // Volumen mínimo dentro del rango de otra tarifa
+                (dto.getVolumenMin().compareTo(t.getVolumenMin()) >= 0 &&
+                dto.getVolumenMin().compareTo(t.getVolumenMax()) <= 0)
+                ||
+                // Volumen máximo dentro del rango de otra tarifa
+                (dto.getVolumenMax().compareTo(t.getVolumenMin()) >= 0 &&
+                dto.getVolumenMax().compareTo(t.getVolumenMax()) <= 0)
+                ||
+                // Si se llega a cubrir completamente el rango con otra tarifa
+                (dto.getVolumenMin().compareTo(t.getVolumenMin()) <= 0 &&
+                dto.getVolumenMax().compareTo(t.getVolumenMax()) >= 0)
+            )
         );
+        
         if (seCruza) {
             return ResponseEntity.status(409).build();
         }
+        
         TarifaVolumenDTO entity = tarifaVolumenService.saveTarifaVolumen(dto);
-        return ResponseEntity.status(201).body(entity);
+        return ResponseEntity.ok(entity); // ✅ 200 OK en lugar de 201 para PUT
     }
     
     

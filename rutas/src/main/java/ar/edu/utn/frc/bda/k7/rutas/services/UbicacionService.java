@@ -34,14 +34,18 @@ public class UbicacionService {
     }
 
     public Ubicacion toUbicacion(UbicacionDTO dto) {
+        if (dto == null) return null;
+        
         Ubicacion entity = new Ubicacion();
         entity.setId(dto.getId());
         entity.setLatitud(dto.getLatitud());
         entity.setLongitud(dto.getLongitud());
         entity.setDireccionTextual(dto.getDireccionTextual());
+        
         if (dto.getCiudad() != null) {
             entity.setCiudad(ciudadService.toCiudad(dto.getCiudad()));
         }
+        
         return entity;
     }
     //FIN Mappers
@@ -62,7 +66,7 @@ public class UbicacionService {
     @Transactional
     public UbicacionDTO saveUbicacion(UbicacionDTO dto) {
         
-        // Si no tenemos lat/lng pero sí dirección...
+        // Si no tenemos lat/lng pero sí dirección, hacer geocoding
         if (dto.getDireccionTextual() != null && (dto.getLatitud() == null || dto.getLongitud() == null)) {
             GeocodingDTO geoInfo = geoApiClient.geocode(dto.getDireccionTextual());
             if (geoInfo != null) {
@@ -70,16 +74,27 @@ public class UbicacionService {
                 dto.setLongitud(geoInfo.getLng());
             }
         }
-        // Si no tenemos dirección pero sí lat/lng...
-        else if (dto.getDireccionTextual() == null && (dto.getLatitud() != null && dto.getLongitud() != null)) {
+        // Si no tenemos dirección pero sí lat/lng, hacer reverse geocoding
+        else if (dto.getDireccionTextual() == null && dto.getLatitud() != null && dto.getLongitud() != null) {
             GeocodingDTO geoInfo = geoApiClient.reverseGeocode(dto.getLatitud(), dto.getLongitud());
             if (geoInfo != null) {
                 dto.setDireccionTextual(geoInfo.getFormattedAddress());
             }
         }
 
+        // Convertir DTO a entidad
         Ubicacion entity = toUbicacion(dto);
-        UbicacionDTO savedEntity = toDTO(ubicacionRepo.save(entity));
-        return savedEntity;
+        
+        // Si viene ciudad con ID, buscarla y asignarla
+        if (dto.getCiudad() != null && dto.getCiudad().getId() != null) {
+            entity.setCiudad(ciudadService.getCiudadById(dto.getCiudad().getId()));
+        }
+        
+        // NO asignar ID (se genera automáticamente en INSERT)
+        entity.setId(null);
+        
+        // Guardar y devolver DTO
+        Ubicacion savedEntity = ubicacionRepo.save(entity);
+        return toDTO(savedEntity);
     }
 }

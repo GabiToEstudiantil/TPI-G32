@@ -27,4 +27,9 @@ public class CiudadService {
         return entity;
     }
     //FIN Mappers
+
+    public Ciudad getCiudadById(Integer id) {
+        return ciudadRepo.findById(id)
+            .orElseThrow(() -> new RuntimeException("Ciudad no encontrada con ID: " + id));
+    }
 }

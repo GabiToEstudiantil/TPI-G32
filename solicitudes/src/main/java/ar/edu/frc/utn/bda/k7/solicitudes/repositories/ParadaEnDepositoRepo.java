@@ -7,7 +7,7 @@ import ar.edu.frc.utn.bda.k7.solicitudes.domain.ParadaEnDeposito;
 import ar.edu.frc.utn.bda.k7.solicitudes.domain.Ruta;
 
 public interface ParadaEnDepositoRepo extends JpaRepository<ParadaEnDeposito, Integer> {
-    ParadaEnDeposito findByRutaIdAndOrdenEnRuta(Ruta ruta, Integer ordenEnRuta);
+    ParadaEnDeposito findByRutaIdAndOrdenEnRuta(Integer rutaId, Integer ordenEnRuta);
 
-    List<ParadaEnDeposito> findByRuta(Ruta ruta);
+    List<ParadaEnDeposito> findByRutaId(Integer rutaId);
 }

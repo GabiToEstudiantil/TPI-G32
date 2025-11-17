@@ -242,28 +242,62 @@ public class RutaService {
 
     public CalcularDefResponseDTO calcularDefinitivo(CalcularDefRequestDTO request) {
         TarifaCombustible tarifaComb = tarifaCombustibleService.getPrimeraTarifa();
+        
+        if (tarifaComb == null) {
+            throw new RuntimeException("No se encontró tarifa de combustible");
+        }
+        
         List<TramoDTO> tramosConCostos = new ArrayList<>();
         List<ParadaEnDepositoDTO> paradasConCostos = new ArrayList<>();
         Double costoTotal = 0.0;
         Long segundosTotales = 0L;
+        
+        // Procesar tramos
         for (TramoDTO tramo : request.getTramos()) {
             CamionDTO camion = camionService.getCamionByDominio(tramo.getCamionDominio());
-            Double costoTramo = camion.getConsumoCombustiblePromedio()*tarifaComb.getPrecioLitro()*tramo.getDistanciaKm();
+            
+            if (camion == null) {
+                throw new RuntimeException("Camión no encontrado: " + tramo.getCamionDominio());
+            }
+            
+            Double costoTramo = camion.getConsumoCombustiblePromedio() * tarifaComb.getPrecioLitro() * tramo.getDistanciaKm();
             tramo.setCostoReal(costoTramo);
             tramosConCostos.add(tramo);
             costoTotal += costoTramo;
-            Long segundosTramo = ChronoUnit.SECONDS.between(tramo.getFechaHoraInicio(), tramo.getFechaHoraFin());
-            segundosTotales += segundosTramo;
+            
+            // ✅ VALIDAR que las fechas NO sean null
+            if (tramo.getFechaHoraInicio() != null && tramo.getFechaHoraFin() != null) {
+                Long segundosTramo = ChronoUnit.SECONDS.between(tramo.getFechaHoraInicio(), tramo.getFechaHoraFin());
+                segundosTotales += segundosTramo;
+            } else {
+                System.err.println("⚠️ Tramo sin fechas: " + tramo.getId() + " - Se omite del cálculo de tiempo");
+            }
         }
+        
+        // Procesar paradas en depósitos
         for (ParadaEnDepositoDTO parada : request.getParadasEnDeposito()) {
             DepositoDTO deposito = depositoService.getDepositoById(parada.getDepositoId());
+            
+            if (deposito == null) {
+                throw new RuntimeException("Depósito no encontrado: " + parada.getDepositoId());
+            }
+            
             Long segundosEstadia = parada.getSegundosEstadia();
-            Double costoEstadia = (deposito.getCostoEstadiaDiario()/24)*(segundosEstadia/3600.0);
-            parada.setCostoTotalEstadia(costoEstadia);
-            paradasConCostos.add(parada);
-            costoTotal += costoEstadia;
-            segundosTotales += parada.getSegundosEstadia();
+            
+            // ✅ VALIDAR que segundosEstadia NO sea null
+            if (segundosEstadia != null && segundosEstadia > 0) {
+                Double costoEstadia = (deposito.getCostoEstadiaDiario() / 24) * (segundosEstadia / 3600.0);
+                parada.setCostoTotalEstadia(costoEstadia);
+                paradasConCostos.add(parada);
+                costoTotal += costoEstadia;
+                segundosTotales += segundosEstadia;
+            } else {
+                System.err.println("⚠️ Parada sin tiempo de estadía: " + parada.getId());
+                parada.setCostoTotalEstadia(0.0);
+                paradasConCostos.add(parada);
+            }
         }
+        
         return new CalcularDefResponseDTO(costoTotal, tramosConCostos, segundosTotales, paradasConCostos);
     }
 }

@@ -59,7 +59,7 @@ services:
       POSTGRES_PASSWORD: admin123
     volumes:
       - data-users:/var/lib/postgresql
-      - ./db-scripts/usuarios:/docker-entrypoint-initdb.d #
+      - ./db-scripts/users:/docker-entrypoint-initdb.d #
     networks:
       - backend
 
@@ -125,7 +125,7 @@ services:
 
 
   # --- 7. Microservicio int-geoapi ---
-  int-geoapi:
+  int-geoapi-app:
     build: ./geoapi
     container_name: int-geoapi-app
     ports:

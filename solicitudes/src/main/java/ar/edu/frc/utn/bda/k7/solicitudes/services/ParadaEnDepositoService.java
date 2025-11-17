@@ -68,8 +68,8 @@ public class ParadaEnDepositoService {
         return toDto(paradaActualizada);
     }
 
-    public ParadaEnDepositoDTO getParadaEnDepositoByRutaAndOrden (Ruta ruta, Integer ordenEnRuta) {
-        ParadaEnDeposito parada = paradaRepo.findByRutaIdAndOrdenEnRuta(ruta, ordenEnRuta);
+    public ParadaEnDepositoDTO getParadaEnDepositoByRutaAndOrden (Integer rutaId, Integer ordenEnRuta) {
+        ParadaEnDeposito parada = paradaRepo.findByRutaIdAndOrdenEnRuta(rutaId  , ordenEnRuta);
         return toDto(parada);
     }
 
@@ -88,7 +88,7 @@ public class ParadaEnDepositoService {
     }
 
     public List<ParadaEnDepositoDTO> getParadaEnDepositoByRuta(Ruta ruta) {
-        List<ParadaEnDeposito> paradas = paradaRepo.findByRuta(ruta);
+        List<ParadaEnDeposito> paradas = paradaRepo.findByRutaId(ruta.getId());
         return paradas.stream().map(this::toDto).toList();
     }
 }

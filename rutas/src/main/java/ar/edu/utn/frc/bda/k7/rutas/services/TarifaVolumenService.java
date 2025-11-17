@@ -46,9 +46,24 @@ public class TarifaVolumenService {
 
     @Transactional
     public TarifaVolumenDTO saveTarifaVolumen(TarifaVolumenDTO dto) {
-        TarifaVolumen entity = toEntity(dto);
-        TarifaVolumenDTO savedEntity = toDTO(tarifaVolumenRepo.save(entity));
-        return savedEntity;
+        TarifaVolumen entity;
+        
+        // Si tiene ID, es un UPDATE - buscar la entidad existente
+        if (dto.getId() != null) {
+            entity = tarifaVolumenRepo.findById(dto.getId())
+                .orElseThrow(() -> new RuntimeException("Tarifa no encontrada con ID: " + dto.getId()));
+            
+            // Actualizar solo los campos modificables
+            entity.setVolumenMin(dto.getVolumenMin());
+            entity.setVolumenMax(dto.getVolumenMax());
+            entity.setCostoKmBase(dto.getCostoKmBase());
+        } else {
+            // Si no tiene ID, es un INSERT - crear nueva entidad
+            entity = toEntity(dto);
+        }
+        
+        TarifaVolumen savedEntity = tarifaVolumenRepo.save(entity);
+        return toDTO(savedEntity);
     }
 
     public TarifaVolumen findTarifaById(Integer tarifaId) {
